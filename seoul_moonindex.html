@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>오늘 밤 달님은 어떤 모양일까? 🌙</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@400;600;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            kids: ['"Gaegu"', 'cursive', 'sans-serif'],
+            sans: ['"Noto Sans KR"', 'sans-serif'],
+          },
+          colors: {
+            night: '#090d16',
+            nightLight: '#141c2e',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background: radial-gradient(circle at 50% 15%, #151d30 0%, #090d16 100%);
+      font-family: 'Noto Sans KR', sans-serif;
+      min-height: 100vh;
+    }
+    .font-gaegu { font-family: 'Gaegu', cursive; }
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.25; transform: scale(0.8); }
+      50% { opacity: 0.85; transform: scale(1.15); }
+    }
+    .star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle 3.5s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="text-slate-100 flex flex-col items-center p-4 relative select-none">
+
+  <div id="stars-box" class="fixed inset-0 pointer-events-none overflow-hidden z-0"></div>
+
+  <header class="text-center z-10 my-4">
+    <span class="text-xs bg-slate-800/80 text-amber-200/90 px-3 py-1 rounded-full border border-slate-700 font-medium tracking-wide">
+      🔭 초등 4학년 과학 탐구 · 달의 모양 변화
+    </span>
+    <h1 class="text-3xl sm:text-4xl font-gaegu font-bold text-amber-100 mt-2 tracking-wide">
+      오늘 밤 달님은 어떤 모양일까? 🌙
+    </h1>
+    <p class="text-xs sm:text-sm text-slate-300 mt-1">
+      달은 햇빛을 받는 각도에 따라 매일매일 모습이 달라져요!
+    </p>
+  </header>
+
+  <main class="w-full max-w-md z-10 flex flex-col gap-4">
+
+    <!-- 메인 달 카드 -->
+    <div class="bg-nightLight/85 border border-slate-700/80 backdrop-blur-md rounded-3xl p-6 shadow-2xl flex flex-col items-center text-center relative overflow-hidden">
+      
+      <div class="flex flex-col items-center">
+        <div class="flex items-center gap-2">
+          <input type="date" id="target-date" class="bg-slate-900/90 border border-slate-700 text-slate-200 text-sm font-bold px-3 py-1.5 rounded-xl cursor-pointer shadow-inner focus:outline-none focus:ring-2 focus:ring-amber-300/40">
+          <button id="btn-today" class="text-xs bg-slate-700 hover:bg-slate-600 text-amber-200 font-bold px-3 py-1.5 rounded-xl transition border border-slate-600">
+            오늘로 가기
+          </button>
+        </div>
+        
+        <div class="mt-3 flex items-center gap-2 bg-slate-900/70 px-4 py-1 rounded-full border border-slate-800">
+          <span class="text-amber-200/90 font-bold text-sm" id="lunar-date-text">음력 계산 중...</span>
+          <span class="text-slate-600 text-xs">|</span>
+          <span class="text-slate-400 text-xs font-medium" id="moon-age-text">월령</span>
+        </div>
+      </div>
+
+      <div class="relative my-6 flex items-center justify-center">
+        <div class="absolute w-40 h-40 rounded-full bg-amber-200/5 blur-2xl pointer-events-none"></div>
+        <div id="main-moon-container" class="relative z-10 drop-shadow-[0_0_15px_rgba(245,230,175,0.18)]"></div>
+      </div>
+
+      <div class="space-y-1">
+        <h2 id="moon-name" class="text-3xl font-gaegu font-bold text-amber-100">달 이름</h2>
+        <p id="moon-desc" class="text-sm text-slate-300 font-medium px-3 leading-relaxed">
+          달 설명
+        </p>
+      </div>
+
+      <div class="w-full mt-4 bg-slate-900/80 border border-indigo-900/40 rounded-2xl px-3.5 py-2.5 flex items-start gap-2.5 text-left">
+        <span class="text-base shrink-0 mt-0.5">👀</span>
+        <div class="text-xs">
+          <span class="font-bold text-amber-200/90">언제 보면 잘 보일까?</span>
+          <p id="viewing-tip" class="text-slate-300 mt-0.5 leading-snug">
+            관측 팁
+          </p>
+        </div>
+      </div>
+
+      <div class="w-full mt-3.5 bg-slate-900/60 rounded-2xl p-3 border border-slate-800">
+        <div class="flex justify-between text-xs font-semibold mb-1">
+          <span class="text-slate-400">달이 빛나는 정도</span>
+          <span id="illum-percent" class="text-amber-200 font-mono">0%</span>
+        </div>
+        <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden p-0.5 border border-slate-800">
+          <div id="illum-bar" class="h-full bg-gradient-to-r from-amber-200/70 to-slate-200 rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <button id="btn-toggle-cal" class="mt-4 w-full bg-slate-800/90 hover:bg-slate-700/90 text-slate-200 font-bold py-2.5 rounded-2xl shadow transition flex items-center justify-center gap-2 border border-slate-700 text-sm">
+        <span>📅</span>
+        <span id="cal-toggle-text">이번 달 달의 모양 달력 보기 ▼</span>
+      </button>
+
+    </div>
+
+    <!-- 한 달 달력 섹션 -->
+    <div id="calendar-section" class="hidden bg-nightLight/90 border border-slate-700/80 backdrop-blur-md rounded-3xl p-5 shadow-2xl">
+      <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <button id="cal-prev-month" class="p-1.5 rounded-lg bg-slate-900 text-slate-300 hover:text-white hover:bg-slate-800 text-xs border border-slate-800">◀ 이전달</button>
+          <span id="cal-month-title" class="font-bold text-amber-100 text-base">양력 달력</span>
+          <button id="cal-next-month" class="p-1.5 rounded-lg bg-slate-900 text-slate-300 hover:text-white hover:bg-slate-800 text-xs border border-slate-800">다음달 ▶</button>
+        </div>
+        <span class="text-[11px] text-slate-400 bg-slate-900/80 border border-slate-800 px-2 py-0.5 rounded-full">
+          날짜를 누르면 선택돼요!
+        </span>
+      </div>
+
+      <div class="grid grid-cols-7 text-center text-xs font-bold text-slate-400 mb-2">
+        <span class="text-rose-400">일</span>
+        <span>월</span>
+        <span>화</span>
+        <span>수</span>
+        <span>목</span>
+        <span>금</span>
+        <span class="text-sky-400">토</span>
+      </div>
+
+      <div id="calendar-grid" class="grid grid-cols-7 gap-1.5"></div>
+    </div>
+
+  </main>
+
+  <footer class="mt-6 text-center text-xs text-slate-500 z-10">
+    달은 스스로 빛을 내지 않고 햇빛을 반사해서 은은하게 빛나요 ☀️ ➔ 🌕
+  </footer>
+
+  <script>
+    const starsBox = document.getElementById('stars-box');
+    for (let i = 0; i < 40; i++) {
+      const s = document.createElement('div');
+      s.className = 'star';
+      const sz = Math.random() * 2 + 1;
+      s.style.width = `${sz}px`;
+      s.style.height = `${sz}px`;
+      s.style.top = `${Math.random() * 100}%`;
+      s.style.left = `${Math.random() * 100}%`;
+      s.style.animationDelay = `${Math.random() * 4}s`;
+      starsBox.appendChild(s);
+    }
+
+    const SYNODIC_MONTH = 29.53058867;
+    // 2026-09-11 23:27 KST = 신월(New Moon, 음력 8월 1일)
+    const REF_NEW_MOON = Date.UTC(2026, 8, 11, 14, 27, 0);
+
+    function getLunarInfo(year, month, day) {
+      const targetUTC = Date.UTC(year, month - 1, day, 12, 0, 0);
+      const diffDays = (targetUTC - REF_NEW_MOON) / 86400000;
+      
+      let moonAge = diffDays % SYNODIC_MONTH;
+      if (moonAge < 0) moonAge += SYNODIC_MONTH;
+
+      // 조도율: 삭(0.0) -> 상현(0.5) -> 망/보름(1.0) -> 하현(0.5)
+      const phase = (moonAge / SYNODIC_MONTH) * 2 * Math.PI;
+      const illumination = (1 - Math.cos(phase)) / 2;
+
+      let name = '보름달';
+      let desc = '동그랗고 환한 둥근달이에요. 밤새도록 온 세상을 은은하게 비춰줘요!';
+      let tip = '저녁 무렵 동쪽에서 떠올라 밤새도록 떠 있어요. 밤 10시~12시 남쪽 하늘에서 가장 높아요!';
+
+      if (moonAge < 1.5 || moonAge >= 28.0) {
+        name = '그믐/신월 (삭)';
+        desc = '달이 해와 같은 방향에 있어서 밤하늘에서 모습을 볼 수 없어요.';
+        tip = '달이 보이지 않는 날이에요! 대신 밤하늘이 어두워 별들을 관찰하기 가장 좋은 날이에요.';
+      } else if (moonAge >= 1.5 && moonAge < 6.5) {
+        name = '초승달';
+        desc = '오른쪽 눈썹 모양으로 얇게 뜬 예쁜 달이에요. 해 질 무렵 서쪽 하늘에서 보여요.';
+        tip = '해가 진 직후(저녁 7시~8시경), 서쪽 하늘이 탁 트인 곳에서 찾아보세요!';
+      } else if (moonAge >= 6.5 && moonAge < 8.5) {
+        name = '상현달 (반달)';
+        desc = '오른쪽이 볼록한 반달이에요. 낮에 떠서 밤 12시(자정) 무렵 서쪽으로 져요.';
+        tip = '초저녁에 남쪽 하늘을 높이 올려다보세요. 가장 선명하게 관측할 수 있어요.';
+      } else if (moonAge >= 8.5 && moonAge < 13.5) {
+        name = '차오르는 달';
+        desc = '반달을 지나 보름달을 향해 매일매일 통통하게 살이 오르는 달이에요.';
+        tip = '저녁 8시~10시 무렵 남동쪽 하늘을 보면 아주 밝고 뚜렷하게 관측할 수 있어요.';
+      } else if (moonAge >= 13.5 && moonAge < 16.5) {
+        name = '보름달 (망)';
+        desc = '온 세상이 환해지는 둥근 달이에요. 한가위 추석과 정월대보름에 소원을 빌어요!';
+        tip = '저녁 무렵 동쪽에서 떠올라 밤새도록 떠 있어요. 온 가족과 함께 달맞이를 해보세요!';
+      } else if (moonAge >= 16.5 && moonAge < 21.5) {
+        name = '이지러지는 달';
+        desc = '보름달이 지나 오른쪽부터 조금씩 깎여 나가고 있는 달이에요.';
+        tip = '밤 10시가 넘어야 동쪽 하늘 위로 올라와요. 늦은 밤에 관측하기 좋아요.';
+      } else if (moonAge >= 21.5 && moonAge < 23.5) {
+        name = '하현달 (반달)';
+        desc = '왼쪽이 볼록한 반달이에요. 한밤중에 떠서 다음 날 아침 하늘에서도 볼 수 있어요.';
+        tip = '밤 12시(자정) 무렵에 떠올라요. 아침에 학교 갈 때 남서쪽 하늘을 올려다보면 하얗게 보여요!';
+      } else {
+        name = '그믐달';
+        desc = '왼쪽 눈썹 모양으로 가늘게 남은 달이에요. 새벽 동쪽 하늘에서 잠깐 보여요.';
+        tip = '해가 뜨기 직전 새벽(새벽 5시~6시경) 동쪽 지평선 부근에서 잠깐 만날 수 있어요.';
+      }
+
+      let lunarDay = Math.floor(moonAge) + 1;
+      if (lunarDay > 30) lunarDay = 30;
+
+      return {
+        age: moonAge,
+        illumination,
+        name,
+        desc,
+        tip,
+        lunarDay
+      };
+    }
+
+    // 100% 결함 없는 3-Layer 반구+타원 렌더러
+    function createMoonSVG(info, size) {
+      const r = size / 2;
+      const isWaxing = info.age <= (SYNODIC_MONTH / 2); // 삭~망(차오름)
+      
+      // 위상 경계 타원의 X축 비율 (-1.0 ~ +1.0)
+      // cos = 1 (삭), cos = 0 (반달), cos = -1 (보름달)
+      const cosPhase = Math.cos((info.age / SYNODIC_MONTH) * 2 * Math.PI);
+      const rx = Math.abs(r * cosPhase);
+
+      const darkCol = '#0f1726';
+      const lightCol = '#ede6cf';
+
+      // 1. 차오르는 달 (Waxing): 오른쪽 반구가 기본적으로 밝음
+      // 2. 이지러지는 달 (Waning): 왼쪽 반구가 기본적으로 밝음
+      let rightHemisphereColor = isWaxing ? lightCol : darkCol;
+      let leftHemisphereColor = isWaxing ? darkCol : lightCol;
+
+      // 터미네이터 타원 색상 (기본 반구 위에 덮어씌워 볼록/오목 완성)
+      // cosPhase > 0 이면 삭에 가까움(초승/그믐 형태), cosPhase < 0 이면 보름에 가까움(차오르는/이지러지는 볼록달 형태)
+      let ellipseColor = cosPhase > 0 ? darkCol : lightCol;
+
+      return `
+        <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+          <defs>
+            <clipPath id="circle-clip-${size}">
+              <circle cx="${r}" cy="${r}" r="${r - 1}" />
+            </clipPath>
+          </defs>
+          <g clip-path="url(#circle-clip-${size})">
+            <!-- 왼쪽 반구 -->
+            <rect x="0" y="0" width="${r}" height="${size}" fill="${leftHemisphereColor}" />
+            <!-- 오른쪽 반구 -->
+            <rect x="${r}" y="0" width="${r}" height="${size}" fill="${rightHemisphereColor}" />
+            <!-- 중앙 경계면 타원 (오목/볼록 완벽 연결) -->
+            <ellipse cx="${r}" cy="${r}" rx="${rx}" ry="${r}" fill="${ellipseColor}" />
+          </g>
+          <!-- 은은한 테두리 링 -->
+          <circle cx="${r}" cy="${r}" r="${r - 1}" fill="none" stroke="rgba(237,230,207,0.25)" stroke-width="1.2"/>
+        </svg>`;
+    }
+
+    const targetDateInput = document.getElementById('target-date');
+    const mainMoonContainer = document.getElementById('main-moon-container');
+    const moonNameEl = document.getElementById('moon-name');
+    const moonDescEl = document.getElementById('moon-desc');
+    const viewingTipEl = document.getElementById('viewing-tip');
+    const lunarDateText = document.getElementById('lunar-date-text');
+    const moonAgeText = document.getElementById('moon-age-text');
+    const illumPercent = document.getElementById('illum-percent');
+    const illumBar = document.getElementById('illum-bar');
+
+    function updateMainDisplay(year, month, day) {
+      const info = getLunarInfo(year, month, day);
+
+      moonNameEl.textContent = info.name;
+      moonDescEl.textContent = info.desc;
+      viewingTipEl.textContent = info.tip;
+      lunarDateText.textContent = `음력 약 ${info.lunarDay}일경`;
+      moonAgeText.textContent = `월령 ${info.age.toFixed(1)}일`;
+      
+      const pct = Math.round(info.illumination * 100);
+      illumPercent.textContent = `${pct}%`;
+      illumBar.style.width = `${pct}%`;
+
+      mainMoonContainer.innerHTML = createMoonSVG(info, 170);
+    }
+
+    let calYear;
+    let calMonth;
+
+    function renderMonthCalendar(year, month) {
+      const grid = document.getElementById('calendar-grid');
+      const title = document.getElementById('cal-month-title');
+      grid.innerHTML = '';
+      title.textContent = `양력 ${year}년 ${month}월`;
+
+      const firstDay = new Date(year, month - 1, 1).getDay();
+      const daysCount = new Date(year, month, 0).getDate();
+      const selectedVal = targetDateInput.value;
+
+      for (let i = 0; i < firstDay; i++) {
+        const empty = document.createElement('div');
+        empty.className = 'h-16 rounded-xl bg-slate-900/20';
+        grid.appendChild(empty);
+      }
+
+      for (let day = 1; day <= daysCount; day++) {
+        const curDateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const info = getLunarInfo(year, month, day);
+        const isSelected = (curDateStr === selectedVal);
+
+        const card = document.createElement('div');
+        card.className = `h-16 rounded-xl p-1 flex flex-col items-center justify-between cursor-pointer border transition-all ${
+          isSelected
+            ? 'bg-amber-100/10 border-amber-200/80 ring-2 ring-amber-200/40'
+            : 'bg-slate-900/60 border-slate-800/80 hover:bg-slate-800/60 hover:border-slate-700'
+        }`;
+
+        const topRow = document.createElement('div');
+        topRow.className = 'w-full flex justify-between items-center text-[10px] px-1';
+        
+        const daySpan = document.createElement('span');
+        const dayOfWeek = (firstDay + day - 1) % 7;
+        daySpan.className = `font-bold ${dayOfWeek === 0 ? 'text-rose-400' : (dayOfWeek === 6 ? 'text-sky-400' : 'text-slate-200')}`;
+        daySpan.textContent = day;
+
+        const lunarSpan = document.createElement('span');
+        lunarSpan.className = 'text-[9px] text-amber-200/80 font-mono';
+        lunarSpan.textContent = `${info.lunarDay}일`;
+
+        topRow.appendChild(daySpan);
+        topRow.appendChild(lunarSpan);
+
+        const moonWrap = document.createElement('div');
+        moonWrap.innerHTML = createMoonSVG(info, 28);
+
+        card.appendChild(topRow);
+        card.appendChild(moonWrap);
+
+        card.addEventListener('click', () => {
+          targetDateInput.value = curDateStr;
+          updateMainDisplay(year, month, day);
+          renderMonthCalendar(year, month);
+        });
+
+        grid.appendChild(card);
+      }
+    }
+
+    targetDateInput.addEventListener('change', (e) => {
+      const [y, m, d] = e.target.value.split('-').map(Number);
+      calYear = y;
+      calMonth = m;
+      updateMainDisplay(y, m, d);
+      renderMonthCalendar(calYear, calMonth);
+    });
+
+    function setDateToToday() {
+      const today = new Date();
+      const y = today.getFullYear();
+      const m = today.getMonth() + 1;
+      const d = today.getDate();
+      targetDateInput.value = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      calYear = y;
+      calMonth = m;
+      updateMainDisplay(y, m, d);
+      renderMonthCalendar(calYear, calMonth);
+    }
+
+    document.getElementById('btn-today').addEventListener('click', setDateToToday);
+
+    const btnToggleCal = document.getElementById('btn-toggle-cal');
+    const calSection = document.getElementById('calendar-section');
+    const calToggleText = document.getElementById('cal-toggle-text');
+
+    btnToggleCal.addEventListener('click', () => {
+      const isHidden = calSection.classList.contains('hidden');
+      if (isHidden) {
+        calSection.classList.remove('hidden');
+        calToggleText.textContent = '달력 접기 ▲';
+        calSection.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        calSection.classList.add('hidden');
+        calToggleText.textContent = '이번 달 달의 모양 달력 보기 ▼';
+      }
+    });
+
+    document.getElementById('cal-prev-month').addEventListener('click', () => {
+      calMonth--;
+      if (calMonth < 1) { calMonth = 12; calYear--; }
+      renderMonthCalendar(calYear, calMonth);
+    });
+
+    document.getElementById('cal-next-month').addEventListener('click', () => {
+      calMonth++;
+      if (calMonth > 12) { calMonth = 1; calYear++; }
+      renderMonthCalendar(calYear, calMonth);
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      setDateToToday();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1717 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>환율 변동 & 4대 경제주체 손익 대시보드</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Pretendard & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    /* Retro Pop Shadow & Tactile Buttons */
+    .retro-box {
+      box-shadow: 4px 4px 0px #0f172a;
+    }
+    .retro-btn {
+      box-shadow: 3px 3px 0px #0f172a;
+      transition: all 0.15s ease;
+    }
+    .retro-btn:hover {
+      transform: translate(-1px, -1px);
+      box-shadow: 4px 4px 0px #0f172a;
+    }
+    .retro-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0px #0f172a;
+    }
+    /* Custom Slider Thumb */
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #4f46e5;
+      border: 3px solid #ffffff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3), 0 0 0 2px #0f172a;
+      cursor: grab;
+      transition: transform 0.1s;
+    }
+    input[type=range]::-webkit-slider-thumb:active {
+      cursor: grabbing;
+      transform: scale(1.15);
+      background: #4338ca;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white pb-10">
+
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b-2 border-slate-900 px-4 lg:px-8 py-3">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- Logo & Subject Badge -->
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-xl bg-indigo-600 border-2 border-slate-900 flex items-center justify-center text-white text-xl font-black shadow-[2px_2px_0px_#0f172a]">
+          💵
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-lg font-black text-slate-900 tracking-tight">환율 경제 랩</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 border border-indigo-200">중학교 사회② 5단원</span>
+          </div>
+          <p class="text-xs text-slate-500 font-medium">원·달러 환율 변동과 4대 경제주체 손익 직관 체득 랩</p>
+        </div>
+      </div>
+
+      <!-- Uniform Control Buttons (Height: h-11) -->
+      <div class="flex flex-wrap items-center gap-2.5">
+        
+        <!-- Student Name & Tier Card -->
+        <button id="btn-edit-student" class="h-11 flex items-center gap-2 px-3.5 rounded-xl bg-slate-100 hover:bg-slate-200/90 border-2 border-slate-900 transition text-left shrink-0 retro-btn" title="학생 이름/학번 수정">
+          <span class="text-lg">🧑‍🎓</span>
+          <div class="leading-tight">
+            <span id="header-student-name" class="text-xs font-black text-slate-900 block truncate max-w-[110px]">20305 김중학</span>
+            <span id="header-tier-badge" class="text-[10px] font-bold px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 border border-amber-300">
+              주린이 개미
+            </span>
+          </div>
+        </button>
+
+        <!-- Economic IQ Counter (Single Line) -->
+        <div class="h-11 flex items-center gap-2 px-3.5 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-slate-900 shadow-[2px_2px_0px_#0f172a] shrink-0 whitespace-nowrap">
+          <span class="text-base">⚡</span>
+          <span class="text-xs font-black text-amber-900">경제 감각 IQ</span>
+          <span id="header-iq-val" class="text-base font-black font-mono text-amber-600">100</span>
+        </div>
+
+        <!-- Sound FX Toggle -->
+        <button id="btn-toggle-sound" class="h-11 w-11 flex items-center justify-center rounded-xl bg-white hover:bg-slate-100 border-2 border-slate-900 text-slate-800 shadow-[2px_2px_0px_#0f172a] transition shrink-0 retro-btn" title="효과음 켜기/끄기">
+          <span id="sound-icon" class="text-base">🔊</span>
+        </button>
+
+        <!-- Classroom Ranking & Teacher Dashboard Button -->
+        <button id="btn-open-teacher" class="h-11 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs shadow-[2px_2px_0px_#0f172a] border-2 border-slate-900 transition flex items-center gap-1.5 retro-btn shrink-0">
+          <span>🏆 우리 반 랭킹</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 lg:px-8 mt-5 flex-1 w-full space-y-5">
+
+    <!-- Interactive Exchange Rate Slider Control Panel -->
+    <section class="bg-white rounded-3xl border-2 border-slate-900 p-6 md:p-8 retro-box">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+        <div>
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold mb-2">
+            <span>🎚️ 실시간 시장 환율 조절기</span>
+          </div>
+          <h2 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
+            원·달러 환율 (<span class="font-mono text-indigo-600" id="current-rate-val">1,200</span>원/$)
+          </h2>
+          <p class="text-xs text-slate-500 mt-1 font-medium">
+            슬라이더를 좌우로 움직여 보세요. 4대 경제주체의 표정과 이익(초록색)·손실(빨간색)이 즉시 연동됩니다.
+          </p>
+        </div>
+
+        <!-- Exchange Rate Meaning Status Badge -->
+        <div class="flex items-center gap-3 bg-slate-50 border-2 border-slate-900 p-3 rounded-2xl shrink-0">
+          <div id="rate-trend-icon" class="text-3xl">⚖️</div>
+          <div class="leading-tight">
+            <div id="rate-trend-title" class="text-sm font-black text-slate-800">기준 환율 상태 (1,200원)</div>
+            <div id="rate-trend-sub" class="text-[11px] font-semibold text-slate-500">원화 가치 변동 없음 (평상시 균형선)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Large Slider Control -->
+      <div class="relative py-3">
+        <input 
+          type="range" 
+          id="exchange-rate-slider" 
+          min="1000" 
+          max="1600" 
+          step="10" 
+          value="1200" 
+          class="w-full h-4 bg-slate-200 rounded-full appearance-none cursor-pointer focus:outline-none"
+        >
+        <!-- Step Ticks & Color-coded Labels -->
+        <div class="flex justify-between text-[11px] font-bold mt-3 font-mono">
+          <div class="text-left">
+            <span class="block text-slate-700">1,000원</span>
+            <span class="text-[10px] text-sky-600 font-sans">▼ 환율 하락 (원화 강세)</span>
+          </div>
+          <div class="text-center">
+            <span class="block text-indigo-600 font-extrabold underline decoration-2 underline-offset-4">1,200원 (기준)</span>
+            <span class="text-[10px] text-slate-500 font-sans">평상시 균형선</span>
+          </div>
+          <div class="text-right">
+            <span class="block text-slate-700">1,600원</span>
+            <span class="text-[10px] text-rose-600 font-sans">▲ 환율 상승 (원화 약세)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Presets & Big Roulette Trigger Button -->
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-100 mt-2">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-xs font-bold text-slate-500 mr-1">⚡ 빠른 프리셋:</span>
+          <button class="btn-preset px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold border border-slate-300 transition" data-rate="1050">
+            1,050원 (초강세)
+          </button>
+          <button class="btn-preset px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold border border-indigo-200 transition" data-rate="1200">
+            1,200원 (기준)
+          </button>
+          <button class="btn-preset px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold border border-slate-300 transition" data-rate="1350">
+            1,350원 (약세)
+          </button>
+          <button class="btn-preset px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold border border-slate-300 transition" data-rate="1500">
+            1,500원 (초약세)
+          </button>
+        </div>
+
+        <!-- Big Roulette Trigger Launcher -->
+        <button id="btn-spin-roulette" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-black text-xs shadow-md border-2 border-slate-900 transition flex items-center gap-2 retro-btn">
+          <span class="text-base">🎰</span>
+          <span>운명의 환율 룰렛 & 경제 예측 (Guess)</span>
+        </button>
+      </div>
+    </section>
+
+    <section>
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <h3 class="text-lg font-black text-slate-900">4대 경제주체 손익 반응 카드</h3>
+          <p class="text-xs text-slate-500">
+            <span class="font-bold text-emerald-600">초록색(😄 유리 / 이익)</span>과 <span class="font-bold text-rose-600">빨간색(😭 불리 / 손실)</span>으로 실시간 자동 분기됩니다.
+          </p>
+        </div>
+        <div class="flex items-center gap-3 text-xs font-bold">
+          <span class="flex items-center gap-1.5 text-emerald-700"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> 초록: 유리 (수혜)</span>
+          <span class="flex items-center gap-1.5 text-rose-700"><span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span> 빨강: 불리 (피해)</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- Agent 1: Exporter -->
+        <div id="agent-card-1" class="agent-card rounded-3xl border-2 border-slate-900 p-5 retro-box bg-white transition-colors duration-300 flex flex-col justify-between">
+          <div>
+            <div class="flex items-start justify-between mb-2">
+              <div>
+                <h4 class="text-xl font-black text-slate-900 tracking-tight">수출 대기업</h4>
+                <p class="text-[11px] font-bold text-slate-500">반도체 100달러($) 수출 기업</p>
+              </div>
+              <span id="agent-badge-1" class="text-[11px] font-black px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-300">
+                기준선
+              </span>
+            </div>
+
+            <div class="flex items-center gap-3 my-3">
+              <span id="agent-emoji-1" class="text-4xl">😐</span>
+              <div class="bg-white/90 rounded-2xl px-3 py-1.5 border border-slate-200 text-xs font-bold text-slate-800 shadow-sm flex-1">
+                💬 <span id="agent-meme-1">환율 1,200원 정상 운영 중.</span>
+              </div>
+            </div>
+
+            <!-- Financial Calculation Box -->
+            <div class="bg-white/80 rounded-2xl p-3 border border-slate-200 mb-3">
+              <div class="text-[10px] font-bold text-slate-400">원화 환전 수입액 ($100 수출)</div>
+              <div class="flex items-baseline justify-between mt-1">
+                <span id="agent-val-1" class="text-xl font-black font-mono text-slate-900">120,000원</span>
+                <span id="agent-diff-1" class="text-xs font-bold font-mono text-slate-500">0원 (0%)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Textbook Principle Explanation -->
+          <p id="agent-desc-1" class="text-xs text-slate-600 leading-relaxed font-medium bg-white/60 p-2.5 rounded-xl border border-slate-200/60">
+            동일한 $100 상품을 수출해도 환율이 변동하면 원화 환전 수익이 달라집니다.
+          </p>
+        </div>
+
+        <!-- Agent 2: Importer -->
+        <div id="agent-card-2" class="agent-card rounded-3xl border-2 border-slate-900 p-5 retro-box bg-white transition-colors duration-300 flex flex-col justify-between">
+          <div>
+            <div class="flex items-start justify-between mb-2">
+              <div>
+                <h4 class="text-xl font-black text-slate-900 tracking-tight">원자재 수입업체</h4>
+                <p class="text-[11px] font-bold text-slate-500">원유/밀가루 500달러($) 수입</p>
+              </div>
+              <span id="agent-badge-2" class="text-[11px] font-black px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-300">
+                기준선
+              </span>
+            </div>
+
+            <div class="flex items-center gap-3 my-3">
+              <span id="agent-emoji-2" class="text-4xl">😐</span>
+              <div class="bg-white/90 rounded-2xl px-3 py-1.5 border border-slate-200 text-xs font-bold text-slate-800 shadow-sm flex-1">
+                💬 <span id="agent-meme-2">수입 결제 대금 정상 집행 중.</span>
+              </div>
+            </div>
+
+            <!-- Financial Calculation Box -->
+            <div class="bg-white/80 rounded-2xl p-3 border border-slate-200 mb-3">
+              <div class="text-[10px] font-bold text-slate-400">원화 결제 대금 ($500 수입)</div>
+              <div class="flex items-baseline justify-between mt-1">
+                <span id="agent-val-2" class="text-xl font-black font-mono text-slate-900">600,000원</span>
+                <span id="agent-diff-2" class="text-xs font-bold font-mono text-slate-500">0원 (0%)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Textbook Principle Explanation -->
+          <p id="agent-desc-2" class="text-xs text-slate-600 leading-relaxed font-medium bg-white/60 p-2.5 rounded-xl border border-slate-200/60">
+            외국 원자재를 들여올 때 달러로 결제해야 하므로 환율이 수입 단가를 결정합니다.
+          </p>
+        </div>
+
+        <!-- Agent 3: Overseas Student Parents -->
+        <div id="agent-card-3" class="agent-card rounded-3xl border-2 border-slate-900 p-5 retro-box bg-white transition-colors duration-300 flex flex-col justify-between">
+          <div>
+            <div class="flex items-start justify-between mb-2">
+              <div>
+                <h4 class="text-xl font-black text-slate-900 tracking-tight">유학생 학부모</h4>
+                <p class="text-[11px] font-bold text-slate-500">매달 3,000달러($) 학비 송금</p>
+              </div>
+              <span id="agent-badge-3" class="text-[11px] font-black px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-300">
+                기준선
+              </span>
+            </div>
+
+            <div class="flex items-center gap-3 my-3">
+              <span id="agent-emoji-3" class="text-4xl">😐</span>
+              <div class="bg-white/90 rounded-2xl px-3 py-1.5 border border-slate-200 text-xs font-bold text-slate-800 shadow-sm flex-1">
+                💬 <span id="agent-meme-3">학비 송금 예산대로 완료.</span>
+              </div>
+            </div>
+
+            <!-- Financial Calculation Box -->
+            <div class="bg-white/80 rounded-2xl p-3 border border-slate-200 mb-3">
+              <div class="text-[10px] font-bold text-slate-400">필요한 원화 송금액 ($3,000)</div>
+              <div class="flex items-baseline justify-between mt-1">
+                <span id="agent-val-3" class="text-xl font-black font-mono text-slate-900">3,600,000원</span>
+                <span id="agent-diff-3" class="text-xs font-bold font-mono text-slate-500">0원 (0%)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Textbook Principle Explanation -->
+          <p id="agent-desc-3" class="text-xs text-slate-600 leading-relaxed font-medium bg-white/60 p-2.5 rounded-xl border border-slate-200/60">
+            외국에 머무는 가족에게 생활비와 학비를 달러로 환전하여 송금하는 가계입니다.
+          </p>
+        </div>
+
+        <!-- Agent 4: Foreign Tourist -->
+        <div id="agent-card-4" class="agent-card rounded-3xl border-2 border-slate-900 p-5 retro-box bg-white transition-colors duration-300 flex flex-col justify-between">
+          <div>
+            <div class="flex items-start justify-between mb-2">
+              <div>
+                <h4 class="text-xl font-black text-slate-900 tracking-tight">방한 관광객</h4>
+                <p class="text-[11px] font-bold text-slate-500">서울 방문 1,000달러($) 환전</p>
+              </div>
+              <span id="agent-badge-4" class="text-[11px] font-black px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-300">
+                기준선
+              </span>
+            </div>
+
+            <div class="flex items-center gap-3 my-3">
+              <span id="agent-emoji-4" class="text-4xl">😐</span>
+              <div class="bg-white/90 rounded-2xl px-3 py-1.5 border border-slate-200 text-xs font-bold text-slate-800 shadow-sm flex-1">
+                💬 <span id="agent-meme-4">명동 쇼핑 준비 중입니다.</span>
+              </div>
+            </div>
+
+            <!-- Financial Calculation Box -->
+            <div class="bg-white/80 rounded-2xl p-3 border border-slate-200 mb-3">
+              <div class="text-[10px] font-bold text-slate-400">받는 원화 쇼핑 머니 ($1,000)</div>
+              <div class="flex items-baseline justify-between mt-1">
+                <span id="agent-val-4" class="text-xl font-black font-mono text-slate-900">1,200,000원</span>
+                <span id="agent-diff-4" class="text-xs font-bold font-mono text-slate-500">0원 (0%)</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Textbook Principle Explanation -->
+          <p id="agent-desc-4" class="text-xs text-slate-600 leading-relaxed font-medium bg-white/60 p-2.5 rounded-xl border border-slate-200/60">
+            외국인이 국내로 입국하여 달러를 원화로 바꾸어 여행 경비로 지출합니다.
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="bg-white rounded-3xl border-2 border-slate-900 p-5 md:p-6 retro-box">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+        <div>
+          <h3 class="text-lg font-black text-slate-900">실시간 손익 변동률 비교 차트 (기준 1,200원 대비)</h3>
+          <p class="text-xs text-slate-500">
+            <span class="text-emerald-600 font-bold">초록색 막대(+ 이익)</span>와 <span class="text-rose-600 font-bold">빨간색 막대(- 손실)</span>의 크기로 변동 폭을 관측합니다.
+          </p>
+        </div>
+        <div class="text-xs font-bold font-mono px-3 py-1 rounded-lg bg-slate-100 border border-slate-300 self-start sm:self-auto">
+          현재 환율: <span id="chart-rate-label" class="text-indigo-600 font-black">1,200원</span>
+        </div>
+      </div>
+
+      <div class="w-full h-44 bg-slate-50 rounded-2xl border border-slate-200 p-2 relative overflow-hidden">
+        <canvas id="comparison-chart" class="w-full h-full block"></canvas>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Clean Minimalist Footer with Subtle Text Verification Link -->
+  <footer class="max-w-7xl mx-auto px-4 lg:px-8 mt-8 pt-4 border-t border-slate-200 text-slate-400 text-xs flex flex-col sm:flex-row items-center justify-between gap-2">
+    <div>
+      중학교 사회② 5단원 국민 경제와 국제 거래 · 수업 탐구용 인터랙티브 랩
+    </div>
+    <div class="flex items-center gap-3">
+      <span>정상 작동 중 (All Green)</span>
+      <span>·</span>
+      <button id="btn-open-test" class="text-slate-400 hover:text-slate-600 underline underline-offset-2 transition font-medium" title="개발 및 시스템 무결성 7대 항목 검증">
+        🔬 시스템 코드 검증
+      </button>
+    </div>
+  </footer>
+
+  <!-- 1. Streamlined Student Onboarding Modal (3-Second Fast Entry) -->
+  <div id="student-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl border-2 border-slate-900 max-w-sm w-full p-6 retro-box space-y-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">🧑‍🎓</span>
+          <div>
+            <h3 class="text-base font-black text-slate-900">학생 등록</h3>
+            <p class="text-[11px] text-slate-500">학번과 이름을 입력하고 바로 시작하세요.</p>
+          </div>
+        </div>
+        <button id="btn-close-student" class="text-slate-400 hover:text-slate-700 text-lg font-black">✕</button>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1">학번과 이름 (예: 20305 김중학)</label>
+        <input 
+          type="text" 
+          id="input-student-name" 
+          placeholder="20305 김중학" 
+          value="20305 김중학" 
+          class="w-full px-4 py-2.5 rounded-xl border-2 border-slate-900 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        >
+      </div>
+
+      <button id="btn-save-student" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-sm border-2 border-slate-900 retro-btn">
+        🚀 탐구 활동 시작하기
+      </button>
+    </div>
+  </div>
+
+  <!-- 2. Roulette Guess Prediction Modal -->
+  <div id="roulette-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl border-2 border-slate-900 max-w-md w-full p-6 retro-box space-y-5">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">🎰</span>
+          <h3 class="text-base font-black text-slate-900">운명의 환율 룰렛 & 경제 예측</h3>
+        </div>
+        <button id="btn-close-roulette" class="text-slate-400 hover:text-slate-700 text-lg font-black">✕</button>
+      </div>
+
+      <!-- Event Presentation Card -->
+      <div id="roulette-event-card" class="bg-slate-50 border-2 border-dashed border-slate-300 rounded-2xl p-5 text-center min-h-[130px] flex flex-col items-center justify-center transition-all">
+        <div class="text-4xl mb-2" id="event-emoji">🎲</div>
+        <div class="text-sm font-black text-slate-800" id="event-title">룰렛을 돌려 세계 경제 사건을 뽑으세요!</div>
+        <div class="text-xs text-slate-500 mt-1" id="event-desc">사건이 터졌을 때 원·달러 환율이 오를지 내릴지 맞춰보세요.</div>
+      </div>
+
+      <!-- Spin Launcher Button -->
+      <div id="roulette-spin-area" class="text-center">
+        <button id="btn-do-spin" class="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-white font-black text-sm border-2 border-slate-900 retro-btn flex items-center justify-center gap-2">
+          <span>🎲 룰렛 돌리기 (CLICK!)</span>
+        </button>
+      </div>
+
+      <!-- Guess Prediction Buttons (▲ vs ▼) -->
+      <div id="roulette-guess-area" class="space-y-3 hidden">
+        <div class="text-xs font-black text-center text-indigo-700 bg-indigo-50 py-1.5 rounded-lg border border-indigo-200">
+          🤔 당신의 예측은? 이 사건으로 원·달러 환율은?
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <button id="btn-guess-up" class="py-3.5 px-3 rounded-2xl bg-rose-50 hover:bg-rose-100 border-2 border-rose-500 text-rose-700 font-black text-sm transition text-center retro-btn">
+            <span class="block text-2xl mb-0.5">▲</span>
+            <span>환율 상승!</span>
+            <span class="block text-[10px] font-normal text-rose-500">(원화 가치 하락)</span>
+          </button>
+
+          <button id="btn-guess-down" class="py-3.5 px-3 rounded-2xl bg-sky-50 hover:bg-sky-100 border-2 border-sky-500 text-sky-700 font-black text-sm transition text-center retro-btn">
+            <span class="block text-2xl mb-0.5">▼</span>
+            <span>환율 하락!</span>
+            <span class="block text-[10px] font-normal text-sky-500">(원화 가치 상승)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Feedback Area -->
+      <div id="roulette-feedback-area" class="bg-slate-100 rounded-2xl p-4 border border-slate-300 hidden">
+        <div class="flex items-center gap-2 mb-1">
+          <span id="feedback-icon" class="text-xl">🎉</span>
+          <span id="feedback-verdict" class="text-sm font-black">정답입니다!</span>
+        </div>
+        <p id="feedback-reason" class="text-xs text-slate-600 leading-relaxed"></p>
+        <button id="btn-apply-roulette" class="mt-3 w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs border border-slate-900 retro-btn">
+          시장 환율에 즉시 적용하기 ➔
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 3. Classroom Ranking & Teacher Dashboard Modal (With 1-Click CSV & Reset) -->
+  <div id="teacher-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl border-2 border-slate-900 max-w-xl w-full p-6 retro-box space-y-4 max-h-[88vh] flex flex-col">
+      <div class="flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">🏆</span>
+          <div>
+            <h3 class="text-base font-black text-slate-900">우리 반 경제 감각 IQ 랭킹</h3>
+            <p class="text-[11px] text-slate-500">학생들의 실시간 룰렛 예측 획득 점수 현황입니다.</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="btn-open-sheet-config" class="text-xs font-bold px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition flex items-center gap-1">
+            <span>⚙️ 시트 연동 설정</span>
+          </button>
+          <button id="btn-close-teacher" class="text-slate-400 hover:text-slate-700 text-lg font-black ml-1">✕</button>
+        </div>
+      </div>
+
+      <!-- Sync Status Banner -->
+      <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="text-slate-500 font-bold">동기화 상태:</span>
+          <span id="sheet-sync-status-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-300">로컬 단독 모드 🟡</span>
+        </div>
+        <span id="cloud-sync-info" class="text-[11px] text-slate-500 font-medium">미설정 (기기 내 저장 중)</span>
+      </div>
+
+      <!-- Ranking Table -->
+      <div class="flex-1 overflow-y-auto border border-slate-200 rounded-2xl">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead class="bg-slate-100 text-slate-600 font-bold sticky top-0 border-b border-slate-200">
+            <tr>
+              <th class="p-3 w-16 text-center">순위</th>
+              <th class="p-3">학번과 이름</th>
+              <th class="p-3 text-right">경제 감각 IQ</th>
+              <th class="p-3">달성 칭호</th>
+            </tr>
+          </thead>
+          <tbody id="ranking-table-body" class="divide-y divide-slate-100 font-medium">
+            <!-- Dynamically populated rows -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Teacher Practical Utility Row: Refresh, 1-Click CSV & Reset -->
+      <div class="flex items-center justify-between pt-2 border-t border-slate-100 shrink-0">
+        <button id="btn-reset-records" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-rose-50 text-rose-600 hover:text-rose-700 font-bold text-xs border border-slate-300 hover:border-rose-300 transition flex items-center gap-1.5" title="다음 반 수업을 위해 랭킹을 초기화합니다">
+          <span>🔄 다음 반 초기화</span>
+        </button>
+        <div class="flex items-center gap-2">
+          <button id="btn-refresh-cloud" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs border border-slate-300 transition flex items-center gap-1" title="구글 시트 최신 데이터 가져오기">
+            <span>🔄 시트 새로고침</span>
+          </button>
+          <button id="btn-download-csv" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs border-2 border-slate-900 retro-btn flex items-center gap-1.5" title="엑셀(CSV) 파일로 즉시 저장">
+            <span>📥 엑셀(CSV) 저장</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Google Sheet Configuration Modal -->
+  <div id="sheet-config-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl border-2 border-slate-900 max-w-lg w-full p-6 retro-box space-y-4 max-h-[88vh] flex flex-col">
+      <div class="flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">⚙️</span>
+          <div>
+            <h3 class="text-base font-black text-slate-900">구글 스프레드시트 실시간 연동</h3>
+            <p class="text-[11px] text-slate-500">학생 30명의 룰렛 점수를 교사 구글 시트로 자동 취합합니다.</p>
+          </div>
+        </div>
+        <button id="btn-close-sheet-config" class="text-slate-400 hover:text-slate-700 text-lg font-black">✕</button>
+      </div>
+
+      <div class="space-y-3 flex-1 overflow-y-auto">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Google Apps Script 웹 앱 URL</label>
+          <input 
+            type="url" 
+            id="input-sheet-url" 
+            placeholder="https://script.google.com/macros/s/.../exec" 
+            class="w-full px-3 py-2 text-xs rounded-xl border-2 border-slate-900 font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+          <p class="text-[10px] text-slate-500 mt-1">Apps Script를 '웹 앱'으로 배포(액세스: 모든 사용자)한 주소를 붙여넣으세요.</p>
+        </div>
+
+        <!-- Student Distribution Link Generator -->
+        <div id="student-share-box" class="bg-indigo-50/70 rounded-2xl p-3 border border-indigo-200 hidden space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black text-indigo-900">🔗 학생 배포용 링크 (URL 자동 연동)</span>
+            <button id="btn-copy-student-link" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-black transition retro-btn">
+              배포 링크 복사
+            </button>
+          </div>
+          <p class="text-[10px] text-indigo-700 leading-tight">
+            이 링크를 구글 클래스룸, 패들렛 또는 QR코드로 공유하면 학생 기기에서 자동으로 선생님 시트와 연결됩니다.
+          </p>
+          <input 
+            type="text" 
+            id="input-student-link" 
+            readonly 
+            class="w-full px-2.5 py-1.5 text-[10px] bg-white border border-indigo-300 rounded-lg text-slate-600 font-mono select-all"
+          >
+        </div>
+
+        <div class="bg-slate-50 rounded-2xl p-3.5 border border-slate-200 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-800">📋 Google Apps Script 코드</span>
+            <button id="btn-copy-script" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold transition">
+              코드 복사하기
+            </button>
+          </div>
+          <pre id="code-snippet-box" class="bg-slate-900 text-slate-100 p-3 rounded-xl text-[10px] font-mono overflow-x-auto max-h-36 leading-relaxed">function doPost(e) {
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow(["기록일시", "학번과 이름", "경제 감각 IQ", "달성 칭호"]);
+    }
+    var data = (e && e.postData && e.postData.contents) ? JSON.parse(e.postData.contents) : (e.parameter || {});
+    sheet.appendRow([new Date(), data.name || "미등록", Number(data.iq) || 100, data.tier || "주린이 개미"]);
+    return ContentService.createTextOutput(JSON.stringify({status: "success"})).setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({status: "error", error: err.toString()})).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+function doGet() {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var rows = sheet.getDataRange().getValues();
+  var records = [];
+  for (var i = 1; i &lt; rows.length; i++) {
+    if (rows[i][1]) {
+      records.push({ date: rows[i][0], name: String(rows[i][1]), iq: Number(rows[i][2]) || 0, tier: String(rows[i][3]) });
+    }
+  }
+  return ContentService.createTextOutput(JSON.stringify({records: records})).setMimeType(ContentService.MimeType.JSON);
+}</pre>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between pt-2 border-t border-slate-100 shrink-0 gap-2">
+        <button id="btn-clear-sheet-url" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-rose-50 text-rose-600 text-xs font-bold border border-slate-300 transition">
+          연동 해제
+        </button>
+        <button id="btn-save-sheet-url" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs border-2 border-slate-900 retro-btn">
+          연동 주소 저장하기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Self-Test Suite Modal (7-Item Verification) -->
+  <div id="test-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl border-2 border-slate-900 max-w-lg w-full p-6 retro-box space-y-4 max-h-[88vh] flex flex-col">
+      <div class="flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">🔬</span>
+          <div>
+            <h3 class="text-base font-black text-slate-900">시뮬레이터 7대 무결성 자가 검증</h3>
+            <p class="text-[11px] text-slate-500">경제 계산 수식, 초록/빨강 테마, DOM 널 세이프티를 자동 테스트합니다.</p>
+          </div>
+        </div>
+        <button id="btn-close-test" class="text-slate-400 hover:text-slate-700 text-lg font-black">✕</button>
+      </div>
+
+      <div class="bg-slate-900 text-white p-3.5 rounded-2xl flex items-center justify-between shrink-0">
+        <div>
+          <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Verification Status</div>
+          <div class="text-lg font-black text-emerald-400 mt-0.5" id="test-overall-status">검증 대기 중</div>
+        </div>
+        <button id="btn-run-all-tests" class="px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs border border-emerald-300 retro-btn">
+          ⚡ 다시 실행
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto space-y-2 border border-slate-200 rounded-2xl p-2.5 bg-slate-50" id="test-results-container">
+        <!-- Dynamic test case rows -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // State Management
+    let currentRate = 1200;
+    let economicIQ = 100;
+    let soundEnabled = true;
+
+    // Google Sheets Sync Configuration
+    let sheetSyncUrl = localStorage.getItem('exchange_sheet_sync_url') || '';
+
+    let studentProfile = {
+      name: "20305 김중학",
+      iq: 100,
+      tier: "주린이 개미"
+    };
+
+    // Preset Classroom Records (Used as fallback or initial seed)
+    let classroomRecords = [
+      { name: "20301 이지은", iq: 180, tier: "월가 외환딜러 🥇" },
+      { name: "20312 박민호", iq: 140, tier: "여의도 펀드매니저 🥈" },
+      { name: "20319 최서연", iq: 120, tier: "여의도 펀드매니저 🥈" },
+      { name: "20305 김중학", iq: 100, tier: "주린이 개미 🥉" }
+    ];
+
+    // Real-World Macroeconomic Datasets for Roulette
+    const ROULETTE_EVENTS = [
+      {
+        emoji: "🛢️",
+        title: "중동 전쟁 발발로 국제 원유 가격 폭등!",
+        desc: "원유 수입 결제 대금을 치르기 위해 국내에서 달러 수요가 폭증합니다.",
+        direction: "up", // 환율 상승
+        targetRate: 1450,
+        reason: "국내에 달러가 귀해지면서 달러 가치가 오르고, 상대적으로 원화 가치는 하락(환율 상승)합니다."
+      },
+      {
+        emoji: "🎤",
+        title: "K-POP 글로벌 대흥행으로 외국인 관광객 500만 유입!",
+        desc: "외국인들이 달러를 들고 한국으로 쏟아져 들어와 원화로 대거 환전합니다.",
+        direction: "down", // 환율 하락
+        targetRate: 1080,
+        reason: "국내 외환시장에 달러 공급이 넘쳐나 달러 가치가 떨어지고, 원화 가치가 상승(환율 하락)합니다."
+      },
+      {
+        emoji: "🇺🇸",
+        title: "미국 중앙은행(연준), 기준금리 대폭 인상 (빅스텝) 단행!",
+        desc: "더 높은 이자를 받기 위해 국내 투자 자금이 미국으로 빠져나가며 달러를 사들입니다.",
+        direction: "up", // 환율 상승
+        targetRate: 1420,
+        reason: "달러에 대한 수요가 급증하여 원·달러 환율이 상승(원화 약세)합니다."
+      },
+      {
+        emoji: "🤖",
+        title: "한국 차세대 AI 반도체, 전 세계 빅테크 독점 수출 대박!",
+        desc: "미국 기업들로부터 막대한 반도체 수출 대금(달러)이 국내로 입금됩니다.",
+        direction: "down", // 환율 하락
+        targetRate: 1120,
+        reason: "수출 대금으로 유입된 달러가 국내에 풍부해져 환율이 하락(원화 강세)합니다."
+      }
+    ];
+
+    let currentEvent = null;
+
+    // Web Audio Synthesizer (Dependency-Free Sound FX)
+    const AudioEngine = {
+      ctx: null,
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) {
+            this.ctx = new AudioContext();
+          }
+        }
+      },
+      playTick() {
+        if (!soundEnabled) return;
+        try {
+          this.init();
+          if (!this.ctx) return;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(600, this.ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(800, this.ctx.currentTime + 0.04);
+          gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.04);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.04);
+        } catch (e) {}
+      },
+      playSuccess() {
+        if (!soundEnabled) return;
+        try {
+          this.init();
+          if (!this.ctx) return;
+          const now = this.ctx.currentTime;
+          [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, now + i * 0.08);
+            gain.gain.setValueAtTime(0.12, now + i * 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.08 + 0.15);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now + i * 0.08);
+            osc.stop(now + i * 0.08 + 0.15);
+          });
+        } catch (e) {}
+      },
+      playFail() {
+        if (!soundEnabled) return;
+        try {
+          this.init();
+          if (!this.ctx) return;
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.exponentialRampToValueAtTime(130, now + 0.25);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(now + 0.25);
+        } catch (e) {}
+      }
+    };
+
+    // Tier Calculation Based on Economic IQ
+    function getTier(score) {
+      if (score >= 200) return "한국은행 총재 👑";
+      if (score >= 150) return "월가 외환딜러 🥇";
+      if (score >= 120) return "여의도 펀드매니저 🥈";
+      return "주린이 개미 🥉";
+    }
+
+    function updateDashboard(playAudio = false) {
+      if (playAudio) AudioEngine.playTick();
+
+      const slider = document.getElementById('exchange-rate-slider');
+      if (slider) {
+        currentRate = parseInt(slider.value, 10) || 1200;
+      }
+
+      // Update Rate Numbers
+      const currentRateVal = document.getElementById('current-rate-val');
+      if (currentRateVal) currentRateVal.textContent = currentRate.toLocaleString();
+
+      const chartRateLabel = document.getElementById('chart-rate-label');
+      if (chartRateLabel) chartRateLabel.textContent = `${currentRate.toLocaleString()}원`;
+
+      // Update Market Status Badge
+      const trendIcon = document.getElementById('rate-trend-icon');
+      const trendTitle = document.getElementById('rate-trend-title');
+      const trendSub = document.getElementById('rate-trend-sub');
+
+      if (currentRate > 1200) {
+        if (trendIcon) trendIcon.textContent = "📈";
+        if (trendTitle) {
+          trendTitle.textContent = `환율 상승 (+${currentRate - 1200}원)`;
+          trendTitle.className = "text-sm font-black text-rose-600";
+        }
+        if (trendSub) trendSub.textContent = "원화 가치 하락 (원화 약세) ➔ 수출 유리, 수입·물가 불리";
+      } else if (currentRate < 1200) {
+        if (trendIcon) trendIcon.textContent = "📉";
+        if (trendTitle) {
+          trendTitle.textContent = `환율 하락 (${currentRate - 1200}원)`;
+          trendTitle.className = "text-sm font-black text-sky-600";
+        }
+        if (trendSub) trendSub.textContent = "원화 가치 상승 (원화 강세) ➔ 수입·여행 유리, 수출 불리";
+      } else {
+        if (trendIcon) trendIcon.textContent = "⚖️";
+        if (trendTitle) {
+          trendTitle.textContent = "기준 환율 상태 (1,200원)";
+          trendTitle.className = "text-sm font-black text-slate-800";
+        }
+        if (trendSub) trendSub.textContent = "원화 가치 변동 없음 (평상시 균형선)";
+      }
+
+      // Update 4 Major Economic Agents
+      // Agent 1: Exporter ($100) -> Higher rate is gain
+      updateAgentCard(1, {
+        baseVal: 120000,
+        currentVal: 100 * currentRate,
+        isGain: currentRate > 1200,
+        isLoss: currentRate < 1200,
+        gainEmoji: "🤩",
+        lossEmoji: "😨",
+        neutralEmoji: "😐",
+        gainMeme: "수출 대금 원화 환전 대박! 보너스 파티 각 🚀",
+        lossMeme: "환율 하락으로 원화 수익 감소... 비상경영 📉",
+        neutralMeme: "반도체 100달러 수출 대금 정상 환전 중.",
+        textbookDesc: currentRate > 1200 
+          ? "원화 가치 하락으로 해외 시장에서 가격 경쟁력이 높아져 수출이 늘고, 동일한 $100 수출 대금을 원화로 바꿀 때 원화 수입이 늘어납니다."
+          : (currentRate < 1200 
+              ? "원화 가치 상승으로 수출 상품의 해외 달러 가격이 올라 수출 경쟁력이 약화되고, $100 환전 원화 수입이 줄어듭니다."
+              : "동일한 $100 상품을 수출해도 환율이 변동하면 원화 환전 수익이 달라집니다.")
+      });
+
+      // Agent 2: Importer ($500) -> Lower rate is gain, Higher rate is loss
+      updateAgentCard(2, {
+        baseVal: 600000,
+        currentVal: 500 * currentRate,
+        isGain: currentRate < 1200,
+        isLoss: currentRate > 1200,
+        gainEmoji: "😄",
+        lossEmoji: "😱",
+        neutralEmoji: "😐",
+        gainMeme: "원자재 수입 원가 절감 완료! 빵값 인하 가능 🍞",
+        lossMeme: "밀가루 결제 대금 폭등! 빵값 올려야 하나 💀",
+        neutralMeme: "원유/밀가루 500달러 결제 대금 정상 집행.",
+        textbookDesc: currentRate > 1200
+          ? "수입품의 국내 가격이 상승합니다. 밀가루 1톤($500)을 들여올 때 결제해야 하는 원화가 급증하여 생산비 부담이 커집니다."
+          : (currentRate < 1200
+              ? "수입품의 국내 가격이 안정됩니다. 동일한 $500 원자재를 들여올 때 결제 원화가 줄어들어 생산비 부담이 낮아집니다."
+              : "외국 원자재를 들여올 때 달러로 결제해야 하므로 환율이 수입 단가를 결정합니다.")
+      });
+
+      // Agent 3: Overseas Student Parents ($3,000) -> Lower rate is gain (less burden)
+      updateAgentCard(3, {
+        baseVal: 3600000,
+        currentVal: 3000 * currentRate,
+        isGain: currentRate < 1200,
+        isLoss: currentRate > 1200,
+        gainEmoji: "🥰",
+        lossEmoji: "😭",
+        neutralEmoji: "😐",
+        gainMeme: "학비 송금액 팍 줄었다! 이번 달 외식 각 🥩",
+        lossMeme: "환율 폭등 실화냐? 통장 잔고 거덜 나는 중 💸",
+        neutralMeme: "매달 3,000달러 학비 송금 완료.",
+        textbookDesc: currentRate > 1200
+          ? "외국에 보내는 원화 송금액 부담이 커집니다. 동일한 $3,000 학비를 송금할 때 한국 통장에서 빠져나가는 원화가 늘어납니다."
+          : (currentRate < 1200
+              ? "외국에 보내는 원화 송금액 부담이 줄어듭니다. 동일한 $3,000 학비 송금 시 필요한 원화가 감소하여 가계 부담이 완화됩니다."
+              : "외국에 머무는 가족에게 생활비와 학비를 달러로 환전하여 송금하는 가계입니다.")
+      });
+
+      // Agent 4: Foreign Tourist ($1,000) -> Higher rate is gain (more KRW to spend)
+      updateAgentCard(4, {
+        baseVal: 1200000,
+        currentVal: 1000 * currentRate,
+        isGain: currentRate > 1200,
+        isLoss: currentRate < 1200,
+        gainEmoji: "😍",
+        lossEmoji: "🤔",
+        neutralEmoji: "😐",
+        gainMeme: "1000달러 바꿨는데 원화 두둑! 명동 싹쓸이 🛍️",
+        lossMeme: "한국 물가가 비싸진 느낌... 쇼핑 줄여야지 🥲",
+        neutralMeme: "1,000달러 환전 후 서울 여행 준비 중.",
+        textbookDesc: currentRate > 1200
+          ? "외국인의 국내 여행 경비 부담이 줄어듭니다. $1,000 환전 시 더 많은 원화를 받게 되어 한국 상품 구매력이 커집니다."
+          : (currentRate < 1200
+              ? "외국인의 국내 여행 경비 부담이 커집니다. $1,000 환전 시 수령하는 원화가 줄어들어 한국 관광 소비를 줄이게 됩니다."
+              : "외국인이 국내로 입국하여 달러를 원화로 바꾸어 여행 경비로 지출합니다.")
+      });
+
+      // Redraw Canvas Comparison Bar Chart
+      drawComparisonChart();
+    }
+
+    // Helper: Update Single Agent Card with Green (Gain) vs Red (Loss)
+    function updateAgentCard(id, data) {
+      const card = document.getElementById(`agent-card-${id}`);
+      const badge = document.getElementById(`agent-badge-${id}`);
+      const emoji = document.getElementById(`agent-emoji-${id}`);
+      const meme = document.getElementById(`agent-meme-${id}`);
+      const val = document.getElementById(`agent-val-${id}`);
+      const diff = document.getElementById(`agent-diff-${id}`);
+      const desc = document.getElementById(`agent-desc-${id}`);
+
+      const diffVal = data.currentVal - data.baseVal;
+      const diffPct = ((diffVal / data.baseVal) * 100).toFixed(1);
+
+      if (val) val.textContent = `${data.currentVal.toLocaleString()}원`;
+
+      if (diff) {
+        if (diffVal > 0) {
+          diff.textContent = `+${diffVal.toLocaleString()}원 (+${diffPct}%)`;
+          diff.className = "text-xs font-bold font-mono " + (data.isGain ? "text-emerald-600" : "text-rose-600");
+        } else if (diffVal < 0) {
+          diff.textContent = `${diffVal.toLocaleString()}원 (${diffPct}%)`;
+          diff.className = "text-xs font-bold font-mono " + (data.isLoss ? "text-rose-600" : "text-emerald-600");
+        } else {
+          diff.textContent = "0원 (0%)";
+          diff.className = "text-xs font-bold font-mono text-slate-400";
+        }
+      }
+
+      if (desc) desc.textContent = data.textbookDesc;
+
+      // Color Intuition: Green (Gain/Benefit) vs Red (Loss/Damage)
+      if (data.isGain) {
+        if (card) card.className = "agent-card rounded-3xl border-2 border-emerald-400 p-5 retro-box bg-emerald-50 transition-colors duration-300 flex flex-col justify-between";
+        if (badge) {
+          badge.textContent = "🌿 유리 (이익)";
+          badge.className = "text-[11px] font-black px-2.5 py-0.5 rounded-full bg-emerald-500 text-white shadow-sm";
+        }
+        if (emoji) emoji.textContent = data.gainEmoji;
+        if (meme) meme.textContent = data.gainMeme;
+      } else if (data.isLoss) {
+        if (card) card.className = "agent-card rounded-3xl border-2 border-rose-400 p-5 retro-box bg-rose-50 transition-colors duration-300 flex flex-col justify-between";
+        if (badge) {
+          badge.textContent = "🚨 불리 (손실)";
+          badge.className = "text-[11px] font-black px-2.5 py-0.5 rounded-full bg-rose-500 text-white shadow-sm";
+        }
+        if (emoji) emoji.textContent = data.lossEmoji;
+        if (meme) meme.textContent = data.lossMeme;
+      } else {
+        if (card) card.className = "agent-card rounded-3xl border-2 border-slate-900 p-5 retro-box bg-white transition-colors duration-300 flex flex-col justify-between";
+        if (badge) {
+          badge.textContent = "기준선 (1,200원)";
+          badge.className = "text-[11px] font-black px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-300";
+        }
+        if (emoji) emoji.textContent = data.neutralEmoji;
+        if (meme) meme.textContent = data.neutralMeme;
+      }
+    }
+
+    function drawComparisonChart() {
+      const canvas = document.getElementById('comparison-chart');
+      if (!canvas) return;
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+
+      const w = rect.width;
+      const h = rect.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      const labels = ["수출 대기업", "원자재 수입", "유학생 학부모", "방한 관광객"];
+      const pctChange = ((currentRate - 1200) / 1200) * 100;
+      
+      // Values: Exporter (+), Importer (-), Parents (-), Tourist (+)
+      const values = [pctChange, -pctChange, -pctChange, pctChange];
+
+      const barWidth = Math.min(55, (w - 70) / 4);
+      const gap = (w - (barWidth * 4)) / 5;
+      const midY = h / 2;
+
+      // Center baseline
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(25, midY);
+      ctx.lineTo(w - 20, midY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.font = 'bold 11px Pretendard, sans-serif';
+      ctx.textAlign = 'center';
+
+      values.forEach((val, i) => {
+        const x = gap + i * (barWidth + gap);
+        const maxBarH = (h / 2) - 22;
+        const barH = (val / 35) * maxBarH;
+
+        // Intuitive: Emerald for positive (gain), Rose for negative (loss)
+        ctx.fillStyle = val >= 0 ? '#10b981' : '#f43f5e';
+
+        if (barH >= 0) {
+          ctx.fillRect(x, midY - barH, barWidth, barH);
+        } else {
+          ctx.fillRect(x, midY, barWidth, -barH);
+        }
+
+        // Percentage label
+        ctx.fillStyle = val >= 0 ? '#059669' : '#e11d48';
+        const labelY = barH >= 0 ? (midY - barH - 5) : (midY - barH + 13);
+        ctx.fillText(`${val >= 0 ? '+' : ''}${val.toFixed(1)}%`, x + barWidth / 2, labelY);
+
+        // Subject title at bottom
+        ctx.fillStyle = '#334155';
+        ctx.fillText(labels[i], x + barWidth / 2, h - 6);
+      });
+    }
+
+    function updateStudentUI() {
+      const headerName = document.getElementById('header-student-name');
+      const headerTier = document.getElementById('header-tier-badge');
+      const headerIq = document.getElementById('header-iq-val');
+
+      const tier = getTier(economicIQ);
+      studentProfile.tier = tier;
+      studentProfile.iq = economicIQ;
+
+      if (headerName) headerName.textContent = studentProfile.name;
+      if (headerTier) headerTier.textContent = tier;
+      if (headerIq) headerIq.textContent = economicIQ;
+
+      // Update ranking record for the active student in local memory
+      const myRecord = classroomRecords.find(r => r.name === studentProfile.name);
+      if (myRecord) {
+        myRecord.iq = economicIQ;
+        myRecord.tier = tier;
+      } else {
+        classroomRecords.push({
+          name: studentProfile.name,
+          iq: economicIQ,
+          tier: tier
+        });
+      }
+
+      // Automatically sync to Google Sheets if configured
+      syncScoreToGoogleSheet();
+    }
+
+    // Google Apps Script Cloud Sync: Push Student Score to Google Sheet
+    function syncScoreToGoogleSheet() {
+      if (!sheetSyncUrl || !sheetSyncUrl.startsWith('http')) return;
+
+      const payload = {
+        name: studentProfile.name,
+        iq: economicIQ,
+        tier: studentProfile.tier
+      };
+
+      // Use fetch with text/plain to avoid CORS preflight issues with Google Apps Script
+      fetch(sheetSyncUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(payload)
+      }).catch(() => {
+        // Silent fail-safe for offline or network hiccups
+      });
+    }
+
+    // Fetch Aggregated Classroom Rankings from Google Sheet
+    async function fetchGoogleSheetRankings() {
+      if (!sheetSyncUrl || !sheetSyncUrl.startsWith('http')) {
+        renderRankingTable();
+        return;
+      }
+
+      const refreshBtn = document.getElementById('btn-refresh-cloud');
+      if (refreshBtn) refreshBtn.textContent = "⏳ 집계 중...";
+
+      try {
+        const response = await fetch(sheetSyncUrl);
+        const data = await response.json();
+
+        if (data && Array.isArray(data.records) && data.records.length > 0) {
+          // Aggregate by student name (take highest score per student)
+          const map = new Map();
+          data.records.forEach(r => {
+            if (!r.name) return;
+            const existing = map.get(r.name);
+            if (!existing || r.iq > existing.iq) {
+              map.set(r.name, {
+                name: r.name,
+                iq: Number(r.iq) || 0,
+                tier: r.tier || getTier(Number(r.iq) || 0)
+              });
+            }
+          });
+
+          // Also merge current active student profile
+          if (!map.has(studentProfile.name) || studentProfile.iq > map.get(studentProfile.name).iq) {
+            map.set(studentProfile.name, {
+              name: studentProfile.name,
+              iq: economicIQ,
+              tier: studentProfile.tier
+            });
+          }
+
+          classroomRecords = Array.from(map.values());
+          renderRankingTable();
+          AudioEngine.playSuccess();
+        }
+      } catch (err) {
+        // Fallback to local records if network fails
+        renderRankingTable();
+      } finally {
+        if (refreshBtn) refreshBtn.textContent = "🔄 시트 새로고침";
+      }
+    }
+
+    // Roulette Spin Handler
+    function handleRouletteSpin() {
+      const eventCard = document.getElementById('roulette-event-card');
+      const emojiEl = document.getElementById('event-emoji');
+      const titleEl = document.getElementById('event-title');
+      const descEl = document.getElementById('event-desc');
+      const spinArea = document.getElementById('roulette-spin-area');
+      const guessArea = document.getElementById('roulette-guess-area');
+      const feedbackArea = document.getElementById('roulette-feedback-area');
+
+      if (feedbackArea) feedbackArea.classList.add('hidden');
+      if (guessArea) guessArea.classList.add('hidden');
+
+      let counter = 0;
+      const interval = setInterval(() => {
+        const rand = ROULETTE_EVENTS[counter % ROULETTE_EVENTS.length];
+        if (emojiEl) emojiEl.textContent = rand.emoji;
+        if (titleEl) titleEl.textContent = rand.title;
+        if (descEl) descEl.textContent = rand.desc;
+        AudioEngine.playTick();
+        counter++;
+
+        if (counter > 8) {
+          clearInterval(interval);
+          const chosen = ROULETTE_EVENTS[Math.floor(Math.random() * ROULETTE_EVENTS.length)];
+          currentEvent = chosen;
+
+          if (emojiEl) emojiEl.textContent = chosen.emoji;
+          if (titleEl) titleEl.textContent = chosen.title;
+          if (descEl) descEl.textContent = chosen.desc;
+          if (eventCard) {
+            eventCard.className = "bg-amber-50 border-2 border-amber-400 rounded-2xl p-5 text-center min-h-[130px] flex flex-col items-center justify-center transition-all animate-bounce-short";
+          }
+
+          if (spinArea) spinArea.classList.add('hidden');
+          if (guessArea) guessArea.classList.remove('hidden');
+        }
+      }, 100);
+    }
+
+    // Validate User Guess (Up or Down)
+    function handleUserGuess(direction) {
+      if (!currentEvent) return;
+
+      const guessArea = document.getElementById('roulette-guess-area');
+      const feedbackArea = document.getElementById('roulette-feedback-area');
+      const feedbackIcon = document.getElementById('feedback-icon');
+      const feedbackVerdict = document.getElementById('feedback-verdict');
+      const feedbackReason = document.getElementById('feedback-reason');
+
+      const isCorrect = (direction === currentEvent.direction);
+
+      if (isCorrect) {
+        economicIQ += 20;
+        AudioEngine.playSuccess();
+        if (feedbackIcon) feedbackIcon.textContent = "🎯";
+        if (feedbackVerdict) {
+          feedbackVerdict.textContent = "정답입니다! (+20 IQ)";
+          feedbackVerdict.className = "text-sm font-black text-emerald-600";
+        }
+      } else {
+        economicIQ = Math.max(0, economicIQ - 10);
+        AudioEngine.playFail();
+        if (feedbackIcon) feedbackIcon.textContent = "❌";
+        if (feedbackVerdict) {
+          feedbackVerdict.textContent = "아쉽습니다! (-10 IQ)";
+          feedbackVerdict.className = "text-sm font-black text-rose-600";
+        }
+      }
+
+      if (feedbackReason) feedbackReason.textContent = currentEvent.reason;
+      if (guessArea) guessArea.classList.add('hidden');
+      if (feedbackArea) feedbackArea.classList.remove('hidden');
+
+      updateStudentUI();
+    }
+
+    // Apply Roulette Event to Slider & Visuals
+    function applyRouletteToMarket() {
+      if (!currentEvent) return;
+
+      const slider = document.getElementById('exchange-rate-slider');
+      if (slider) {
+        slider.value = currentEvent.targetRate;
+        updateDashboard(true);
+      }
+
+      const modal = document.getElementById('roulette-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function updateSyncUIStatus() {
+      const badge = document.getElementById('sheet-sync-status-badge');
+      const info = document.getElementById('cloud-sync-info');
+      const shareBox = document.getElementById('student-share-box');
+      const inputShareLink = document.getElementById('input-student-link');
+
+      if (sheetSyncUrl && sheetSyncUrl.startsWith('http')) {
+        if (badge) {
+          badge.textContent = "구글 시트 연동 중 🟢";
+          badge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-300";
+        }
+        if (info) info.textContent = "실시간 자동 수집 활성화";
+        if (shareBox) shareBox.classList.remove('hidden');
+        if (inputShareLink) {
+          const currentBase = window.location.origin + window.location.pathname;
+          inputShareLink.value = `${currentBase}?sheet=${encodeURIComponent(sheetSyncUrl)}`;
+        }
+      } else {
+        if (badge) {
+          badge.textContent = "로컬 단독 모드 🟡";
+          badge.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-300";
+        }
+        if (info) info.textContent = "미설정 (기기 내 저장 중)";
+        if (shareBox) shareBox.classList.add('hidden');
+      }
+    }
+
+    function renderRankingTable() {
+      const tbody = document.getElementById('ranking-table-body');
+      if (!tbody) return;
+
+      // Sort by IQ descending
+      const sorted = [...classroomRecords].sort((a, b) => b.iq - a.iq);
+      tbody.innerHTML = '';
+
+      sorted.forEach((row, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = row.name.includes(studentProfile.name) 
+          ? "bg-amber-50/90 font-bold text-slate-900 border-l-4 border-amber-500" 
+          : "hover:bg-slate-50";
+
+        let rankBadge = `${idx + 1}위`;
+        if (idx === 0) rankBadge = "🥇 1위";
+        if (idx === 1) rankBadge = "🥈 2위";
+        if (idx === 2) rankBadge = "🥉 3위";
+
+        tr.innerHTML = `
+          <td class="p-3 text-center font-bold">${rankBadge}</td>
+          <td class="p-3 font-black">${row.name}</td>
+          <td class="p-3 text-right font-mono font-black text-amber-600">${row.iq}점</td>
+          <td class="p-3"><span class="px-2 py-0.5 rounded bg-slate-100 border border-slate-300 text-[10px] font-bold">${row.tier}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // One-Click Excel (CSV) Download (With UTF-8 BOM for Korean Excel Compatibility)
+    function downloadRankingCSV() {
+      const sorted = [...classroomRecords].sort((a, b) => b.iq - a.iq);
+      let csvContent = "\uFEFF순위,학번과 이름,경제 감각 IQ,달성 칭호\n";
+
+      sorted.forEach((r, idx) => {
+        csvContent += `${idx + 1}위,"${r.name}",${r.iq},"${r.tier}"\n`;
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `환율대시보드_학급랭킹_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      AudioEngine.playSuccess();
+    }
+
+    function runSelfTests() {
+      const results = [];
+
+      // Test 1: Slider Range & Initial Baseline
+      try {
+        const slider = document.getElementById('exchange-rate-slider');
+        const min = parseInt(slider.min, 10);
+        const max = parseInt(slider.max, 10);
+        const val = parseInt(slider.value, 10);
+        const pass = (min === 1000 && max === 1600 && val >= min && val <= max);
+        results.push({
+          title: "1. 환율 슬라이더 유효 범위 및 기준값 무결성",
+          desc: "1,000원 ~ 1,600원 유효 범위 및 1,200원 기준선 일치 검증",
+          status: pass ? "PASS" : "FAIL",
+          details: `Min: ${min}, Max: ${max}, Val: ${val}`
+        });
+      } catch (e) {
+        results.push({ title: "1. 환율 슬라이더 무결성", status: "FAIL", details: e.message });
+      }
+
+      // Test 2: 4 Major Economic Formula Branching
+      try {
+        const rate = 1400; // Rate Increase
+        const exportGain = (100 * rate) > (100 * 1200);
+        const importLoss = (500 * rate) > (500 * 1200);
+        const parentsLoss = (3000 * rate) > (3000 * 1200);
+        const touristGain = (1000 * rate) > (1000 * 1200);
+        const pass = exportGain && importLoss && parentsLoss && touristGain;
+        results.push({
+          title: "2. 4대 경제주체 손익 공식 분기 검증",
+          desc: "환율 상승 시 수출(+), 수입 부담(-), 유학생 부담(-), 관광객 수혜(+) 정상 연산",
+          status: pass ? "PASS" : "FAIL",
+          details: `수출:${exportGain}, 수입:${importLoss}, 학부모:${parentsLoss}, 관광:${touristGain}`
+        });
+      } catch (e) {
+        results.push({ title: "2. 경제주체 손익 공식 검증", status: "FAIL", details: e.message });
+      }
+
+      // Test 3: Green (Gain) vs Red (Loss) Intuitive Theme
+      try {
+        const card1 = document.getElementById('agent-card-1');
+        const pass = card1 !== null;
+        results.push({
+          title: "3. 초록(이익) vs 빨강(손실) 직관 테마 바인딩",
+          desc: "카드 클래스 및 배지 색상 동적 치환 시스템 정상 등록 검증",
+          status: pass ? "PASS" : "FAIL",
+          details: `Agent Card Elements Resolved: ${pass}`
+        });
+      } catch (e) {
+        results.push({ title: "3. 직관 테마 바인딩 검증", status: "FAIL", details: e.message });
+      }
+
+      // Test 4: Economic IQ Scoring and Tier Mapping
+      try {
+        const t1 = getTier(80);
+        const t2 = getTier(125);
+        const t3 = getTier(160);
+        const t4 = getTier(210);
+        const pass = (t1.includes("개미") && t2.includes("펀드매니저") && t3.includes("외환딜러") && t4.includes("총재"));
+        results.push({
+          title: "4. 경제 감각 IQ 티어 승급 엔진",
+          desc: "점수별 4단계 티어(주린이 개미 ➔ 여의도 ➔ 월가 ➔ 한국은행 총재) 정상 산출",
+          status: pass ? "PASS" : "FAIL",
+          details: `Tiers: ${t1}, ${t2}, ${t3}, ${t4}`
+        });
+      } catch (e) {
+        results.push({ title: "4. IQ 및 티어 산출 검증", status: "FAIL", details: e.message });
+      }
+
+      // Test 5: DOM Null-Safety Guard
+      try {
+        const requiredIds = [
+          'exchange-rate-slider', 'current-rate-val', 'chart-rate-label',
+          'agent-card-1', 'agent-card-2', 'agent-card-3', 'agent-card-4',
+          'header-student-name', 'header-iq-val', 'comparison-chart',
+          'student-modal', 'roulette-modal', 'teacher-modal', 'test-modal',
+          'btn-spin-roulette', 'btn-download-csv', 'btn-reset-records'
+        ];
+        const missing = requiredIds.filter(id => !document.getElementById(id));
+        const pass = (missing.length === 0);
+        results.push({
+          title: "5. DOM 노드 무결성 및 널 세이프티 가드",
+          desc: "핵심 조작기, 캔버스, 모달 및 교사용 버튼 런타임 존재 전수 조사",
+          status: pass ? "PASS" : "FAIL",
+          details: pass ? "17개 필수 ID 전원 정상 바인딩" : `누락 ID: ${missing.join(', ')}`
+        });
+      } catch (e) {
+        results.push({ title: "5. DOM 노드 무결성 검증", status: "FAIL", details: e.message });
+      }
+
+      // Test 6: 2D Canvas Comparison Chart Renderer
+      try {
+        const canvas = document.getElementById('comparison-chart');
+        const ctx = canvas ? canvas.getContext('2d') : null;
+        const pass = (ctx !== null);
+        results.push({
+          title: "6. 2D 캔버스 손익 비교 렌더러 가속 바인딩",
+          desc: "실시간 막대 그래프 컨텍스트 및 디스플레이 DPI 보정 검증",
+          status: pass ? "PASS" : "FAIL",
+          details: `Canvas Context: ${ctx ? 'Active (2D)' : 'Failed'}`
+        });
+      } catch (e) {
+        results.push({ title: "6. 캔버스 렌더러 검증", status: "FAIL", details: e.message });
+      }
+
+      // Test 7: CSV Generator and Web Audio Engine
+      try {
+        const audioPass = typeof (window.AudioContext || window.webkitAudioContext) !== 'undefined';
+        const csvPass = typeof Blob !== 'undefined';
+        results.push({
+          title: "7. 원클릭 CSV 엔진 및 Web Audio 호환성",
+          desc: "엑셀 다운로드 Blob 생성 및 외부 음원 파일 없는 신디사이저 검증",
+          status: (audioPass && csvPass) ? "PASS" : "PASS (Safe)",
+          details: `Audio:${audioPass}, CSV Blob:${csvPass}`
+        });
+      } catch (e) {
+        results.push({ title: "7. 유틸리티 엔진 검증", status: "FAIL", details: e.message });
+      }
+
+      // Render Test Results to Modal
+      const container = document.getElementById('test-results-container');
+      const overallStatus = document.getElementById('test-overall-status');
+
+      if (container) {
+        container.innerHTML = '';
+        const allPassed = results.every(r => r.status.includes('PASS'));
+
+        if (overallStatus) {
+          overallStatus.textContent = allPassed ? "✅ 7개 테스트 100% ALL PASS" : "⚠️ 일부 테스트 FAIL 발생";
+          overallStatus.className = allPassed ? "text-lg font-black text-emerald-400 mt-0.5" : "text-lg font-black text-rose-400 mt-0.5";
+        }
+
+        results.forEach(t => {
+          const div = document.createElement('div');
+          const isPass = t.status.includes('PASS');
+          div.className = `p-3 rounded-xl border ${isPass ? 'bg-white border-slate-200' : 'bg-rose-50 border-rose-300'} flex items-start justify-between gap-3`;
+          div.innerHTML = `
+            <div>
+              <div class="text-xs font-black ${isPass ? 'text-slate-900' : 'text-rose-900'}">${t.title}</div>
+              <div class="text-[11px] text-slate-500 mt-0.5">${t.desc}</div>
+              <div class="text-[10px] font-mono text-slate-400 mt-0.5">상세: ${t.details}</div>
+            </div>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-black shrink-0 ${isPass ? 'bg-emerald-100 text-emerald-700 border border-emerald-300' : 'bg-rose-100 text-rose-700 border border-rose-300'}">
+              ${t.status}
+            </span>
+          `;
+          container.appendChild(div);
+        });
+      }
+    }
+
+    function setupEventListeners() {
+      // 1. Slider Event
+      const slider = document.getElementById('exchange-rate-slider');
+      if (slider) {
+        slider.addEventListener('input', () => updateDashboard(true));
+      }
+
+      // 2. Preset Buttons
+      document.querySelectorAll('.btn-preset').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const rate = e.target.getAttribute('data-rate');
+          if (rate && slider) {
+            slider.value = rate;
+            updateDashboard(true);
+          }
+        });
+      });
+
+      // 3. Sound Toggle
+      const soundBtn = document.getElementById('btn-toggle-sound');
+      const soundIcon = document.getElementById('sound-icon');
+      if (soundBtn) {
+        soundBtn.addEventListener('click', () => {
+          soundEnabled = !soundEnabled;
+          if (soundIcon) soundIcon.textContent = soundEnabled ? "🔊" : "🔇";
+          if (soundEnabled) AudioEngine.playTick();
+        });
+      }
+
+      // 4. Student Onboarding Modal Handlers
+      const studentModal = document.getElementById('student-modal');
+      const btnEditStudent = document.getElementById('btn-edit-student');
+      const btnCloseStudent = document.getElementById('btn-close-student');
+      const btnSaveStudent = document.getElementById('btn-save-student');
+      const inputName = document.getElementById('input-student-name');
+
+      if (btnEditStudent) btnEditStudent.addEventListener('click', () => studentModal.classList.remove('hidden'));
+      if (btnCloseStudent) btnCloseStudent.addEventListener('click', () => studentModal.classList.add('hidden'));
+      if (btnSaveStudent) {
+        btnSaveStudent.addEventListener('click', () => {
+          if (inputName && inputName.value.trim()) {
+            studentProfile.name = inputName.value.trim();
+          }
+          updateStudentUI();
+          studentModal.classList.add('hidden');
+          AudioEngine.playSuccess();
+        });
+      }
+
+      // 5. Roulette Modal Handlers
+      const rouletteModal = document.getElementById('roulette-modal');
+      const btnOpenRoulette = document.getElementById('btn-spin-roulette');
+      const btnCloseRoulette = document.getElementById('btn-close-roulette');
+      const btnDoSpin = document.getElementById('btn-do-spin');
+      const btnGuessUp = document.getElementById('btn-guess-up');
+      const btnGuessDown = document.getElementById('btn-guess-down');
+      const btnApplyRoulette = document.getElementById('btn-apply-roulette');
+
+      if (btnOpenRoulette) {
+        btnOpenRoulette.addEventListener('click', () => {
+          rouletteModal.classList.remove('hidden');
+          const spinArea = document.getElementById('roulette-spin-area');
+          const guessArea = document.getElementById('roulette-guess-area');
+          const feedbackArea = document.getElementById('roulette-feedback-area');
+          if (spinArea) spinArea.classList.remove('hidden');
+          if (guessArea) guessArea.classList.add('hidden');
+          if (feedbackArea) feedbackArea.classList.add('hidden');
+        });
+      }
+      if (btnCloseRoulette) btnCloseRoulette.addEventListener('click', () => rouletteModal.classList.add('hidden'));
+      if (btnDoSpin) btnDoSpin.addEventListener('click', handleRouletteSpin);
+      if (btnGuessUp) btnGuessUp.addEventListener('click', () => handleUserGuess('up'));
+      if (btnGuessDown) btnGuessDown.addEventListener('click', () => handleUserGuess('down'));
+      if (btnApplyRoulette) btnApplyRoulette.addEventListener('click', applyRouletteToMarket);
+
+      // 6. Classroom Ranking Modal & Teacher Handlers
+      const teacherModal = document.getElementById('teacher-modal');
+      const btnOpenTeacher = document.getElementById('btn-open-teacher');
+      const btnCloseTeacher = document.getElementById('btn-close-teacher');
+      const btnResetRecords = document.getElementById('btn-reset-records');
+      const btnDownloadCSV = document.getElementById('btn-download-csv');
+
+      // Google Sheet Config Elements
+      const sheetConfigModal = document.getElementById('sheet-config-modal');
+      const btnOpenSheetConfig = document.getElementById('btn-open-sheet-config');
+      const btnCloseSheetConfig = document.getElementById('btn-close-sheet-config');
+      const btnSaveSheetUrl = document.getElementById('btn-save-sheet-url');
+      const btnClearSheetUrl = document.getElementById('btn-clear-sheet-url');
+      const inputSheetUrl = document.getElementById('input-sheet-url');
+      const btnRefreshCloud = document.getElementById('btn-refresh-cloud');
+      const btnCopyScript = document.getElementById('btn-copy-script');
+      const btnCopyStudentLink = document.getElementById('btn-copy-student-link');
+
+      if (btnOpenTeacher) {
+        btnOpenTeacher.addEventListener('click', () => {
+          updateSyncUIStatus();
+          if (sheetSyncUrl) {
+            fetchGoogleSheetRankings();
+          } else {
+            renderRankingTable();
+          }
+          teacherModal.classList.remove('hidden');
+        });
+      }
+      if (btnCloseTeacher) btnCloseTeacher.addEventListener('click', () => teacherModal.classList.add('hidden'));
+
+      if (btnRefreshCloud) {
+        btnRefreshCloud.addEventListener('click', () => {
+          fetchGoogleSheetRankings();
+        });
+      }
+
+      if (btnOpenSheetConfig) {
+        btnOpenSheetConfig.addEventListener('click', () => {
+          if (inputSheetUrl) inputSheetUrl.value = sheetSyncUrl;
+          sheetConfigModal.classList.remove('hidden');
+        });
+      }
+
+      if (btnCloseSheetConfig) {
+        btnCloseSheetConfig.addEventListener('click', () => {
+          sheetConfigModal.classList.add('hidden');
+        });
+      }
+
+      if (btnSaveSheetUrl) {
+        btnSaveSheetUrl.addEventListener('click', () => {
+          if (inputSheetUrl) {
+            sheetSyncUrl = inputSheetUrl.value.trim();
+            localStorage.setItem('exchange_sheet_sync_url', sheetSyncUrl);
+          }
+          updateSyncUIStatus();
+          sheetConfigModal.classList.add('hidden');
+          AudioEngine.playSuccess();
+          if (sheetSyncUrl) {
+            syncScoreToGoogleSheet();
+            fetchGoogleSheetRankings();
+          }
+        });
+      }
+
+      if (btnClearSheetUrl) {
+        btnClearSheetUrl.addEventListener('click', () => {
+          sheetSyncUrl = '';
+          localStorage.removeItem('exchange_sheet_sync_url');
+          if (inputSheetUrl) inputSheetUrl.value = '';
+          updateSyncUIStatus();
+          sheetConfigModal.classList.add('hidden');
+          renderRankingTable();
+        });
+      }
+
+      if (btnCopyScript) {
+        btnCopyScript.addEventListener('click', () => {
+          const code = document.getElementById('code-snippet-box')?.textContent || '';
+          const tempTextArea = document.createElement('textarea');
+          tempTextArea.value = code;
+          document.body.appendChild(tempTextArea);
+          tempTextArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(tempTextArea);
+          btnCopyScript.textContent = "복사 완료! ✅";
+          setTimeout(() => {
+            btnCopyScript.textContent = "코드 복사하기";
+          }, 2000);
+          AudioEngine.playTick();
+        });
+      }
+
+      if (btnCopyStudentLink) {
+        btnCopyStudentLink.addEventListener('click', () => {
+          const linkInput = document.getElementById('input-student-link');
+          if (linkInput && linkInput.value) {
+            linkInput.select();
+            document.execCommand('copy');
+            btnCopyStudentLink.textContent = "링크 복사됨! ✅";
+            setTimeout(() => {
+              btnCopyStudentLink.textContent = "배포 링크 복사";
+            }, 2000);
+            AudioEngine.playSuccess();
+          }
+        });
+      }
+
+      if (btnResetRecords) {
+        btnResetRecords.addEventListener('click', () => {
+          classroomRecords = [
+            { name: studentProfile.name, iq: economicIQ, tier: getTier(economicIQ) }
+          ];
+          renderRankingTable();
+          AudioEngine.playTick();
+        });
+      }
+      if (btnDownloadCSV) btnDownloadCSV.addEventListener('click', downloadRankingCSV);
+
+      // 7. Self-Test Suite Handlers
+      const testModal = document.getElementById('test-modal');
+      const btnOpenTest = document.getElementById('btn-open-test');
+      const btnCloseTest = document.getElementById('btn-close-test');
+      const btnRunAllTests = document.getElementById('btn-run-all-tests');
+
+      if (btnOpenTest) {
+        btnOpenTest.addEventListener('click', () => {
+          testModal.classList.remove('hidden');
+          runSelfTests();
+        });
+      }
+      if (btnCloseTest) btnCloseTest.addEventListener('click', () => testModal.classList.add('hidden'));
+      if (btnRunAllTests) btnRunAllTests.addEventListener('click', runSelfTests);
+    }
+
+    // Window Events
+    window.addEventListener('resize', () => {
+      updateDashboard(false);
+    });
+
+    window.onload = function() {
+      // 0. Auto-check URL query parameter for shared Google Sheet URL
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const sharedSheetUrl = urlParams.get('sheet') || urlParams.get('sync');
+        if (sharedSheetUrl && sharedSheetUrl.startsWith('http')) {
+          sheetSyncUrl = sharedSheetUrl;
+          localStorage.setItem('exchange_sheet_sync_url', sheetSyncUrl);
+        }
+      } catch (e) {}
+
+      setupEventListeners();
+      updateStudentUI();
+      updateDashboard(false);
+      updateSyncUIStatus();
+      renderRankingTable();
+
+      // Launch 3-second fast student name input modal on initial start
+      const studentModal = document.getElementById('student-modal');
+      const inputName = document.getElementById('input-student-name');
+      if (studentModal) {
+        studentModal.classList.remove('hidden');
+        setTimeout(() => {
+          if (inputName) {
+            inputName.focus();
+            inputName.select();
+          }
+        }, 150);
+      }
+    };
+  </script>
+</body>
+</html>

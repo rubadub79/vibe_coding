@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>찾지 말고 만들자: 교사를 위한 바이브 코딩</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+    * { font-family: 'Pretendard', sans-serif; }
+    
+    html {
+      font-size: 17px;
+    }
+
+    /* 드롭다운 셀렉트 박스 표준 렌더링 보정 */
+    .custom-select {
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23475569' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+      background-position: right 0.85rem center;
+      background-repeat: no-repeat;
+      background-size: 1.15em 1.15em;
+      padding-right: 2.75rem;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+    }
+    
+    .toast {
+      transform: translateY(100px);
+      transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s ease;
+    }
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    
+    /* 아코디언 콘텐츠 */
+    .step-content {
+      display: none;
+    }
+    .step-content.open {
+      display: block;
+      animation: expandIn 0.2s ease-in-out;
+    }
+    @keyframes expandIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 탭 콘텐츠 */
+    .ocr-tab-content {
+      display: none;
+    }
+    .ocr-tab-content.active {
+      display: block;
+      animation: fadeIn 0.18s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(3px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased pb-32">
+
+  <!-- ============================================================== -->
+  <!-- 1. HEADER -->
+  <!-- ============================================================== -->
+  <header class="bg-slate-900 text-white sticky top-0 z-50 border-b border-slate-800 shadow-sm">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+      <div class="flex items-center gap-3">
+        <span class="bg-slate-800 text-slate-300 border border-slate-700 text-xs sm:text-sm font-semibold px-3 py-1 rounded-md">
+          숭문중 교내 연수
+        </span>
+        <h1 class="text-xl sm:text-2xl font-bold text-white tracking-tight">
+          찾지 말고 만들자: 교사를 위한 바이브 코딩
+        </h1>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="toggleAllSteps(true)" class="text-xs sm:text-sm font-medium px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+          전체 펼치기
+        </button>
+        <button onclick="toggleAllSteps(false)" class="text-xs sm:text-sm font-medium px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+          전체 접기
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================== -->
+  <!-- 2. HERO BANNER -->
+  <!-- ============================================================== -->
+  <section class="bg-slate-900 text-white py-7 px-4 sm:px-6 border-b border-slate-800">
+    <div class="max-w-5xl mx-auto">
+      <h2 class="text-xl sm:text-2xl font-bold text-white mb-2 tracking-tight">
+        수업용 웹앱 제작 6단계 가이드
+      </h2>
+      <p class="text-slate-400 text-base mb-5">
+        각 단계를 선택하여 복사 프롬프트와 작업 절차를 확인합니다.
+      </p>
+
+      <!-- 6단계 칩 버튼 -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+        <button onclick="openAndScrollTo('step-1')" class="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-lg border border-slate-700 text-center transition">
+          <span class="text-[11px] text-slate-400 font-semibold block">STEP 01</span>
+          <span class="text-sm font-bold text-slate-100">교재 데이터화</span>
+        </button>
+        <button onclick="openAndScrollTo('step-2')" class="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-lg border border-slate-700 text-center transition">
+          <span class="text-[11px] text-slate-400 font-semibold block">STEP 02</span>
+          <span class="text-sm font-bold text-slate-100">브레인스토밍</span>
+        </button>
+        <button onclick="openAndScrollTo('step-3')" class="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-lg border border-slate-700 text-center transition">
+          <span class="text-[11px] text-slate-400 font-semibold block">STEP 03</span>
+          <span class="text-sm font-bold text-slate-100">프로토타입</span>
+        </button>
+        <button onclick="openAndScrollTo('step-4')" class="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-lg border border-slate-700 text-center transition">
+          <span class="text-[11px] text-slate-400 font-semibold block">STEP 04</span>
+          <span class="text-sm font-bold text-slate-100">검증과 수정</span>
+        </button>
+        <button onclick="openAndScrollTo('step-5')" class="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-lg border border-slate-700 text-center transition">
+          <span class="text-[11px] text-slate-400 font-semibold block">STEP 05</span>
+          <span class="text-sm font-bold text-slate-100">클래스룸 공유</span>
+        </button>
+        <button onclick="openAndScrollTo('step-6')" class="bg-slate-800 hover:bg-slate-700 p-2.5 rounded-lg border border-slate-700 text-center transition">
+          <span class="text-[11px] text-slate-400 font-semibold block">STEP 06</span>
+          <span class="text-sm font-bold text-slate-100">[옵션] 데이터 기록</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================== -->
+  <!-- 3. MAIN PIPELINE ACCORDIONS -->
+  <!-- ============================================================== -->
+  <main class="max-w-5xl mx-auto px-4 sm:px-6 mt-7 space-y-4" id="pipeline">
+
+    <!-- [STEP 01] 교재 데이터화 -->
+    <article id="step-1" class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <button onclick="toggleStep('step-1')" class="w-full text-left p-4 sm:p-5 bg-slate-50/70 hover:bg-slate-100/70 flex justify-between items-center transition">
+        <div class="flex items-center gap-3">
+          <span class="w-8 h-8 rounded-lg bg-slate-800 text-white font-bold flex items-center justify-center text-sm">
+            01
+          </span>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold text-slate-600">교재 데이터화</span>
+              <span class="text-xs text-slate-400">| 텍스트 및 시각 자료 추출</span>
+            </div>
+            <h3 class="text-base sm:text-lg font-bold text-slate-900 mt-0.5">교과서/지도서 텍스트 및 시각 자료 추출</h3>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-slate-500 bg-white border border-slate-200 px-2.5 py-1 rounded hidden sm:inline">내용 보기</span>
+          <i id="icon-step-1" class="fa-solid fa-chevron-down text-slate-500 text-sm transition-transform"></i>
+        </div>
+      </button>
+
+      <div id="content-step-1" class="step-content p-5 border-t border-slate-200 space-y-4">
+        <p class="text-base text-slate-700">
+          용도에 맞는 탭을 선택한 뒤 프롬프트를 복사하여 AI에 입력합니다.
+        </p>
+
+        <!-- 3개 탭 버튼 -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-1.5 p-1 bg-slate-100 rounded-lg border border-slate-200">
+          <button id="ocrTabBtn-1" onclick="switchOcrTab(1)" class="ocr-tab-btn py-2.5 px-3 rounded-md font-bold text-sm transition flex items-center justify-center gap-2 bg-slate-800 text-white">
+            1-1. 교재 원문 추출
+          </button>
+          <button id="ocrTabBtn-2" onclick="switchOcrTab(2)" class="ocr-tab-btn py-2.5 px-3 rounded-md font-semibold text-sm transition flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900 hover:bg-slate-200">
+            1-2. 학생 배포용 활동지
+          </button>
+          <button id="ocrTabBtn-3" onclick="switchOcrTab(3)" class="ocr-tab-btn py-2.5 px-3 rounded-md font-semibold text-sm transition flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900 hover:bg-slate-200">
+            1-3. 핵심 개념 & 활동 요약
+          </button>
+        </div>
+
+        <!-- 탭 1-1 -->
+        <div id="ocrContent-1" class="ocr-tab-content active space-y-2.5">
+          <div class="flex justify-between items-center bg-slate-50 px-3.5 py-2.5 rounded-lg border border-slate-200">
+            <span class="text-sm font-bold text-slate-700">용도: 수업 준비 및 교재 원문·시각 자료 보관</span>
+            <button onclick="copySnippet(this)" class="copy-icon-btn px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-md text-sm font-bold flex items-center gap-1.5 transition">
+              <i class="fa-regular fa-copy"></i> 프롬프트 복사
+            </button>
+          </div>
+          <pre class="prompt-text text-base text-slate-800 whitespace-pre-wrap font-sans bg-slate-50 p-4 rounded-lg border border-slate-200 leading-relaxed">첨부한 교과서/지도서 이미지(또는 PDF)의 모든 텍스트를 위계에 맞춰 누락 없이 추출해 줘. 
+대단원, 중단원, 소단원 제목은 마크다운 헤더(#, ##, ###)로 정렬하고, 2단 레이아웃은 좌측 단에서 우측 단 순서로 읽어줘. 본문과 날개단 보충 설명, 사진/삽화의 캡션을 분리해 마크다운으로 정리해 줘.
+
+교재 속 시각 자료는 아래 규칙에 따라 말머리를 달고 정리해 줘:
+1. [도표]: 마크다운 표(Table)로 전환
+2. [그래프]: X축, Y축 변인과 수학적 비례 관계식 정리
+3. [사진] 또는 [실험 장치도]: 배치의 형태와 핵심 관측 포인트를 텍스트로 상세히 묘사
+(※ 단순 장식용 캐릭터나 삽화는 생략하고, 개념 이해에 직결된 핵심 모식도만 [개념 모식도]로 묘사해 줘.)</pre>
+          <p class="text-sm text-slate-500">* 도표, 그래프, 사진/실험 장치도는 의도를 기록하며 필요시 변환합니다.</p>
+        </div>
+
+        <!-- 탭 1-2 -->
+        <div id="ocrContent-2" class="ocr-tab-content space-y-2.5">
+          <div class="flex justify-between items-center bg-slate-50 px-3.5 py-2.5 rounded-lg border border-slate-200">
+            <span class="text-sm font-bold text-slate-700">용도: 출력용 종이 활동지 및 형성평가 제작</span>
+            <button onclick="copySnippet(this)" class="copy-icon-btn px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-md text-sm font-bold flex items-center gap-1.5 transition">
+              <i class="fa-regular fa-copy"></i> 프롬프트 복사
+            </button>
+          </div>
+          <pre class="prompt-text text-base text-slate-800 whitespace-pre-wrap font-sans bg-slate-50 p-4 rounded-lg border border-slate-200 leading-relaxed">추출된 교재 내용을 바탕으로 학생 배포용 종이 활동지 양식으로 재구성해 줘.
+1. 핵심 개념 정의는 (       ) 괄호 넣기 형식으로 처리
+2. 탐구 활동의 '과정 - 관찰 결과 표 - 결론 도출' 빈칸 양식 제작
+3. 하단 형성평가 문항과 예시 답안 분리</pre>
+          <p class="text-sm text-slate-500">* 도표, 그래프, 사진/실험 장치도는 의도를 기록하며 필요시 변환합니다.</p>
+        </div>
+
+        <!-- 탭 1-3 -->
+        <div id="ocrContent-3" class="ocr-tab-content space-y-2.5">
+          <div class="flex justify-between items-center bg-slate-50 px-3.5 py-2.5 rounded-lg border border-slate-200">
+            <span class="text-sm font-bold text-slate-700">용도: 수업용 웹앱 기획을 위한 핵심 개념·활동 요약</span>
+            <button onclick="copySnippet(this)" class="copy-icon-btn px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-md text-sm font-bold flex items-center gap-1.5 transition">
+              <i class="fa-regular fa-copy"></i> 프롬프트 복사
+            </button>
+          </div>
+          <pre class="prompt-text text-base text-slate-800 whitespace-pre-wrap font-sans bg-slate-50 p-4 rounded-lg border border-slate-200 leading-relaxed">이 교재 내용을 바탕으로 학생용 수업 웹앱을 기획하려고 해. 웹앱 제작에 필요한 핵심 개념과 데이터를 요약해 줘.
+1. 단원의 핵심 학습 용어와 주요 개념 정의
+2. 탐구·학습 활동의 단계별 절차와 핵심 판단(분기) 기준
+3. 교재 속 [도표]의 수치 데이터 및 [그래프]의 인과·비례 관계 정리</pre>
+          <p class="text-sm text-slate-500">* 도표, 그래프, 사진/실험 장치도는 의도를 기록하며 필요시 변환합니다.</p>
+        </div>
+      </div>
+    </article>
+
+    <!-- [STEP 02] 브레인스토밍 -->
+    <article id="step-2" class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <button onclick="toggleStep('step-2')" class="w-full text-left p-4 sm:p-5 bg-slate-50/70 hover:bg-slate-100/70 flex justify-between items-center transition">
+        <div class="flex items-center gap-3">
+          <span class="w-8 h-8 rounded-lg bg-slate-800 text-white font-bold flex items-center justify-center text-sm">
+            02
+          </span>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold text-slate-600">브레인스토밍</span>
+              <span class="text-xs text-slate-400">| 활동 아이디어 도출</span>
+            </div>
+            <h3 class="text-base sm:text-lg font-bold text-slate-900 mt-0.5">단원 목표 설정 및 웹앱 아이디어 브레인스토밍</h3>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-slate-500 bg-white border border-slate-200 px-2.5 py-1 rounded hidden sm:inline">내용 보기</span>
+          <i id="icon-step-2" class="fa-solid fa-chevron-down text-slate-500 text-sm transition-transform"></i>
+        </div>
+      </button>
+
+      <div id="content-step-2" class="step-content p-5 border-t border-slate-200 space-y-4">
+        <p class="text-base text-slate-700">
+          단원명과 목표 성격을 지정하면 맞춤형 질문 프롬프트가 구성됩니다.
+        </p>
+
+        <!-- 옵션 선택 툴바 -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1.5">단원 및 주제 입력</label>
+            <input type="text" id="unitInput" value="" placeholder="단원 및 주제를 입력해 주세요" oninput="updateAllPrompts()" 
+                   class="w-full h-12 text-base px-3 rounded-lg border border-slate-300 bg-white font-normal outline-none focus:border-slate-600 transition">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1.5">학습 목표 성격 (인지 영역)</label>
+            <select id="goalType" onchange="updateAllPrompts()" 
+                    class="custom-select w-full h-12 text-base px-3 rounded-lg border border-slate-300 bg-white font-normal outline-none focus:border-slate-600 cursor-pointer transition">
+              <option value="원리·법칙 발견 (실시간 시각화)" selected>1. 원리·법칙 발견 (시뮬레이터형)</option>
+              <option value="개념 훈련·숙달 (반복 계산 및 스피드 퀴즈)">2. 개념 훈련·숙달 (미션 챌린지형)</option>
+              <option value="가치 판단·의사결정 (딜레마, 밸런스 게임)">3. 가치 판단·선택 (밸런스 게임형)</option>
+              <option value="원인 분석·오개념 디버깅 (틀린 전제/수식 고치기)">4. 오개념 디버깅 (고장 수리형)</option>
+              <option value="과정·절차 체험 (실험 순서 단계 밟기)">5. 절차 체험 (인터랙티브 픽션형)</option>
+              <option value="단원 맞춤형 아이디어 자율 탐색 (AI가 최적의 인터랙션 제안)">6. 최적 아이디어 자율 탐색 (AI 자체 제안)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1.5">수업 활동 시간</label>
+            <select id="activityTime" onchange="updateAllPrompts()" 
+                    class="custom-select w-full h-12 text-base px-3 rounded-lg border border-slate-300 bg-white font-normal outline-none focus:border-slate-600 cursor-pointer transition">
+              <option value="수업 중 10~15분간" selected>10~15분 (수업 본 활동)</option>
+              <option value="수업 도입 또는 마무리 5~10분간">5~10분 (도입·형성평가용)</option>
+              <option value="블록타임 또는 심화 탐구 20~25분간">20~25분 (블록타임·심화용)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1.5">추천 아이디어 개수</label>
+            <select id="ideaCount" onchange="updateAllPrompts()" 
+                    class="custom-select w-full h-12 text-base px-3 rounded-lg border border-slate-300 bg-white font-normal outline-none focus:border-slate-600 cursor-pointer transition">
+              <option value="딱 2개" selected>2개 (핵심 선택)</option>
+              <option value="3개">3개 (기본)</option>
+              <option value="4개">4개 (비교용)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-sm font-bold text-slate-700">브레인스토밍 프롬프트:</span>
+            <button onclick="copySnippet(this)" class="copy-icon-btn px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-md text-sm font-bold flex items-center gap-1.5 transition">
+              <i class="fa-regular fa-copy"></i> 프롬프트 복사
+            </button>
+          </div>
+          <pre id="ideaPromptBox" class="prompt-text text-base text-slate-800 whitespace-pre-wrap font-sans bg-slate-50 p-4 rounded-xl border border-slate-200 leading-relaxed"></pre>
+        </div>
+      </div>
+    </article>
+
+    <!-- [STEP 03] 프로토타입 -->
+    <article id="step-3" class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <button onclick="toggleStep('step-3')" class="w-full text-left p-4 sm:p-5 bg-slate-50/70 hover:bg-slate-100/70 flex justify-between items-center transition">
+        <div class="flex items-center gap-3">
+          <span class="w-8 h-8 rounded-lg bg-slate-800 text-white font-bold flex items-center justify-center text-sm">
+            03
+          </span>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold text-slate-600">프로토타입</span>
+              <span class="text-xs text-slate-400">| 초안 생성</span>
+            </div>
+            <h3 class="text-base sm:text-lg font-bold text-slate-900 mt-0.5">단일 HTML 프로토타입 코딩</h3>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-slate-500 bg-white border border-slate-200 px-2.5 py-1 rounded hidden sm:inline">내용 보기</span>
+          <i id="icon-step-3" class="fa-solid fa-chevron-down text-slate-500 text-sm transition-transform"></i>
+        </div>
+      </button>
+
+      <div id="content-step-3" class="step-content p-5 border-t border-slate-200 space-y-4">
+        <p class="text-base text-slate-700">
+          선택한 아이디어를 기반으로 브라우저에서 바로 열 수 있는 단일 HTML 프로토타입을 생성합니다.
+        </p>
+
+        <!-- 디자인 선택 툴바 -->
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">비주얼 스타일 테마 (5종)</label>
+          <select id="themeStyle" onchange="updateAllPrompts()" 
+                  class="custom-select w-full h-12 text-base px-3 rounded-lg border border-slate-300 bg-white font-normal outline-none focus:border-slate-600 cursor-pointer transition">
+            <option value="모던 슬레이트 & 인디고 테마 (차분한 slate-50 배경, indigo-600 포인트, 단정한 랩 UI)" selected>1. 모던 슬레이트 & 인디고 (수학/과학/기본 랩)</option>
+            <option value="클린 화이트 & 파스텔 카드 테마 (순백색 배경, 부드러운 sky/teal 파스텔 카드, 정갈한 학습지 스타일)">2. 클린 화이트 & 파스텔 (국어/영어/어학/독서)</option>
+            <option value="웜 베이지 & 헤리티지 테마 (따뜻한 amber-50/stone 크림톤, 브라운 텍스트, 온화한 인문학 감성)">3. 웜 베이지 & 헤리티지 (사회/역사/지리/도덕)</option>
+            <option value="비비드 팝 & 챌린지 테마 (경쾌한 옐로우/바이올렛 포인트, 볼드한 버튼, 에너지 넘치는 게임 UI)">4. 비비드 팝 & 게임 챌린지 (퀴즈/골든벨/미션)</option>
+            <option value="다크 네이비 & 네온 사이언스 테마 (딥 slate-950 배경, 사이언/블루 네온 발광, 깊은 우주 몰입형)">5. 다크 네이비 & 네온 랩 (천문/우주/시뮬레이터)</option>
+          </select>
+        </div>
+
+        <div class="space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-sm font-bold text-slate-700">프로토타입 생성 프롬프트:</span>
+            <button onclick="copySnippet(this)" class="copy-icon-btn px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-md text-sm font-bold flex items-center gap-1.5 transition">
+              <i class="fa-regular fa-copy"></i> 프롬프트 복사
+            </button>
+          </div>
+          <pre id="codingPromptBox" class="prompt-text text-base text-slate-800 whitespace-pre-wrap font-sans bg-slate-50 p-4 rounded-xl border border-slate-200 leading-relaxed"></pre>
+        </div>
+      </div>
+    </article>
+
+    <!-- [STEP 04] 검증과 수정 -->
+    <article id="step-4" class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <button onclick="toggleStep('step-4')" class="w-full text-left p-4 sm:p-5 bg-slate-50/70 hover:bg-slate-100/70 flex justify-between items-center transition">
+        <div class="flex items-center gap-3">
+          <span class="w-8 h-8 rounded-lg bg-slate-800 text-white font-bold flex items-center justify-center text-sm">
+            04
+          </span>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold text-slate-600">검증과 수정</span>
+              <span class="text-xs text-slate-400">| 교사 의도 반영 & 대화형 수정</span>
+            </div>
+            <h3 class="text-base sm:text-lg font-bold text-slate-900 mt-0.5">교사 의도 반영 & 대화형 반복 수정</h3>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-slate-500 bg-white border border-slate-200 px-2.5 py-1 rounded hidden sm:inline">내용 보기</span>
+          <i id="icon-step-4" class="fa-solid fa-chevron-down text-slate-500 text-sm transition-transform"></i>
+        </div>
+      </button>
+
+      <div id="content-step-4" class="step-content p-5 border-t border-slate-200 space-y-4">
+        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-slate-700 text-base leading-relaxed space-y-1">
+          <p>
+            생성된 웹앱을 직접 조작해 보며, <strong>교사의 수업 의도(학습 목표, 대상 학생 수준, 차시 호흡)</strong>와 화면 구성이 정확히 맞아떨어지는지 확인합니다.
+          </p>
+          <p class="text-slate-600 text-sm">
+            수식 오류나 오개념뿐만 아니라 어색한 문구, 교사의 의도와 다른 피드백 규칙 등을 <strong>AI에게 자연어 대화로 지시하여 다듬어 나갑니다.</strong>
+          </p>
+        </div>
+
+        <div class="space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-sm font-bold text-slate-700">수업 의도 반영 & 팩트체크 프롬프트:</span>
+            <button onclick="copySnippet(this)" class="copy-icon-btn px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-md text-sm font-bold flex items-center gap-1.5 transition">
+              <i class="fa-regular fa-copy"></i> 프롬프트 복사
+            </button>
+          </div>
+          <pre class="prompt-text text-base text-slate-800 whitespace-pre-wrap font-sans bg-slate-50 p-4 rounded-xl border border-slate-200 leading-relaxed" id="factCheckPrompt">방금 작성한 웹앱 코드의 교과 내용과 화면 텍스트를 점검하고 수정해 줘.
+
+1. [교육자료 표현 및 톤앤매너 점검]:
+   - 이 웹앱은 학교 수업을 위한 교육자료야.
+   - 학생에게 노출되는 화면 문구에 허세, 과장된 밈, 불필요한 미사여구가 없는지 전수 점검하고, 교과 수업에 알맞은 명확하고 담백하며 정중한 표현으로 정돈해 줘.
+
+2. [교사 수업 의도 및 피드백 수정]:
+   - 내 수업 의도([수업 의도: 예 - 10분간 학생이 스스로 조작하며 핵심 개념을 발견하도록 유도])에 맞춰 조작 순서와 피드백 문구가 명확하게 제시되는지 확인하고 필요한 부분을 수정해 줘.
+
+3. [공식 출처 및 세션 팩트체크]:
+   - 웹앱에 적용된 공식, 수치, 분기 규칙의 공식 레퍼런스(교육과정 성취기준 또는 공신력 있는 공식 자료)를 이 대화 세션 창에 제시해 줘.
+   - 비례 관계나 부등호 방향, 0으로 나누기 등의 논리적 오류가 없는지 점검해 줘.</pre>
+        </div>
+
+        <!-- 3대 체크포인트 -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5 text-sm">
+          <div class="p-3.5 bg-slate-50 rounded-lg border border-slate-200">
+            <strong class="text-slate-900 font-bold block mb-1">1. 수업 의도 & 지도서 대조</strong>
+            <span class="text-slate-600">단원 목표와 판정 기준이 교사의 의도 및 교과서 기준과 일치하는지 확인</span>
+          </div>
+          <div class="p-3.5 bg-slate-50 rounded-lg border border-slate-200">
+            <strong class="text-slate-900 font-bold block mb-1">2. 교육자료 품격 & 표현 점검</strong>
+            <span class="text-slate-600">허세, 인터넷 밈, 과장된 미사여구를 배제하고 담백한 어휘 사용 여부 점검</span>
+          </div>
+          <div class="p-3.5 bg-slate-50 rounded-lg border border-slate-200">
+            <strong class="text-slate-900 font-bold block mb-1">3. 기기 터치 반응</strong>
+            <span class="text-slate-600">학생 크롬북/태블릿에서 버튼 크기와 조작 반응이 원활한지 확인</span>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- [STEP 05] 클래스룸 공유 -->
+    <article id="step-5" class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <button onclick="toggleStep('step-5')" class="w-full text-left p-4 sm:p-5 bg-slate-50/70 hover:bg-slate-100/70 flex justify-between items-center transition">
+        <div class="flex items-center gap-3">
+          <span class="w-8 h-8 rounded-lg bg-slate-800 text-white font-bold flex items-center justify-center text-sm">
+            05
+          </span>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold text-slate-600">클래스룸 공유</span>
+              <span class="text-xs text-slate-400">| 교실 배포</span>
+            </div>
+            <h3 class="text-base sm:text-lg font-bold text-slate-900 mt-0.5">Google 클래스룸 공유</h3>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-slate-500 bg-white border border-slate-200 px-2.5 py-1 rounded hidden sm:inline">내용 보기</span>
+          <i id="icon-step-5" class="fa-solid fa-chevron-down text-slate-500 text-sm transition-transform"></i>
+        </div>
+      </button>
+
+      <div id="content-step-5" class="step-content p-5 border-t border-slate-200 space-y-4">
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 text-base leading-relaxed space-y-2.5">
+          <p>
+            제미나이 캔버스 우측 상단의 <strong>[공유] ➔ [Google 클래스룸]</strong>을 누르면 교사가 개설한 클래스의 과제로 등록됩니다.
+          </p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5 pt-1 text-sm">
+            <div class="p-3 bg-white rounded-lg border border-slate-200">
+              <strong class="text-slate-900 font-bold block mb-1">1. [공유] 클릭</strong>
+              <span class="text-slate-600">캔버스 화면 우측 상단 공유 아이콘 선택</span>
+            </div>
+            <div class="p-3 bg-white rounded-lg border border-slate-200">
+              <strong class="text-slate-900 font-bold block mb-1">2. [클래스룸] 선택</strong>
+              <span class="text-slate-600">등록할 학급 및 수업 과제 유형 선택</span>
+            </div>
+            <div class="p-3 bg-white rounded-lg border border-slate-200">
+              <strong class="text-slate-900 font-bold block mb-1">3. 과제 게시 완료</strong>
+              <span class="text-slate-600">학생 기기 클래스룸 피드에 게시</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- [STEP 06] 확장 TIP -->
+    <article id="step-6" class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <button onclick="toggleStep('step-6')" class="w-full text-left p-4 sm:p-5 bg-slate-50/70 hover:bg-slate-100/70 flex justify-between items-center transition">
+        <div class="flex items-center gap-3">
+          <span class="w-8 h-8 rounded-lg bg-slate-800 text-white font-bold flex items-center justify-center text-sm">
+            06
+          </span>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-semibold text-slate-600">확장 TIP</span>
+              <span class="text-xs text-slate-400">| 3D 시뮬레이터 및 데이터 기록</span>
+            </div>
+            <h3 class="text-base sm:text-lg font-bold text-slate-900 mt-0.5">3D 시뮬레이터(Vercel) 및 데이터 기록(구글 시트)</h3>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-slate-500 bg-white border border-slate-200 px-2.5 py-1 rounded hidden sm:inline">내용 보기</span>
+          <i id="icon-step-6" class="fa-solid fa-chevron-down text-slate-500 text-sm transition-transform"></i>
+        </div>
+      </button>
+
+      <div id="content-step-6" class="step-content p-5 border-t border-slate-200 space-y-4">
+
+        <!-- 1) 고성능 시뮬레이터 Vercel -->
+        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-slate-700 text-base space-y-2.5">
+          <div class="font-bold text-slate-900 text-base">
+            1) 3D 그래픽이나 고성능 시뮬레이터를 만든다면? ➔ Vercel 활용
+          </div>
+          <p class="text-slate-600 text-sm leading-relaxed">
+            전체 화면 구동이나 고성능 렌더링이 필요한 Three.js 3D 천체 관측 등의 도구에 활용합니다.
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-sm">
+            <div class="p-2.5 bg-white rounded-lg border border-slate-200">
+              <strong class="text-slate-900 font-bold block mb-0.5">A. HTML 저장</strong>
+              <span class="text-slate-600">코드를 index.html 파일로 저장</span>
+            </div>
+            <div class="p-2.5 bg-white rounded-lg border border-slate-200">
+              <strong class="text-slate-900 font-bold block mb-0.5">B. 폴더 업로드</strong>
+              <span class="text-slate-600">vercel.com 대시보드에 폴더 업로드</span>
+            </div>
+            <div class="p-2.5 bg-white rounded-lg border border-slate-200">
+              <strong class="text-slate-900 font-bold block mb-0.5">C. 링크 배포</strong>
+              <span class="text-slate-600">생성된 단독 URL 또는 QR코드 공유</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2) 활동 결과 저장 구글 시트 -->
+        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 text-slate-700 text-base space-y-3">
+          <div class="font-bold text-slate-900 text-base">
+            2) 활동 결과를 저장하여 기록하고 싶다면? ➔ 구글 Sheets - Apps Script 연동
+          </div>
+          <p class="text-slate-600 text-sm leading-relaxed">
+            학생들의 활동 결과를 저장하여 기록하고 싶은 경우에는, 교사 구글 드라이브에서 구글 시트를 먼저 만든 뒤 [확장 프로그램 ➔ Apps Script]로 진입해야 합니다. 시트 열 구조(헤더)에 맞춰 AI에게 Code.gs와 index.html을 한 세트로 작성하도록 요청합니다.
+          </p>
+
+          <div class="p-3 bg-white rounded-lg border border-slate-200 text-sm text-slate-600">
+            <strong class="text-slate-900 font-bold block mb-0.5">시트 열(Header) 구성</strong>
+            필요한 항목에 맞춰 1행 헤더를 설정합니다 (예: <code>제출일시 | 학번 | 이름 | 활동결과 | 자기평가</code>).
+          </div>
+
+          <div class="space-y-1.5">
+            <div class="flex justify-between items-center">
+              <span class="text-sm font-bold text-slate-700">시트 연동형 Code.gs + index.html 세트 생성 프롬프트:</span>
+              <button onclick="copySnippet(this)" class="copy-icon-btn px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-md text-sm font-bold flex items-center gap-1.5 transition">
+                <i class="fa-regular fa-copy"></i> 프롬프트 복사
+              </button>
+            </div>
+            <pre class="prompt-text text-base text-slate-800 whitespace-pre-wrap font-sans bg-white p-4 rounded-xl border border-slate-200 leading-relaxed">[단원명] 수업 웹앱을 Google Apps Script로 구동하여 교사 구글 시트에 학생 활동 결과를 자동 기록하려고 해. 아래 두 파일을 세트로 작성해 줘.
+
+1. Code.gs (백엔드):
+   - doGet() 함수로 index.html 웹페이지 렌더링
+   - saveRecord(data) 함수: 내 시트 1행 헤더 [제출일시, 학번, 이름, 활동결과]에 맞춰 appendRow로 누적 저장
+
+2. index.html (프론트엔드):
+   - 상단에 [학번]과 [이름] 필수 입력창 배치
+   - 활동 완료 후 [활동 결과 제출] 클릭 시 google.script.run.saveRecord() 호출
+   - 단일 HTML (Tailwind CSS CDN) 모던 카드 디자인 적용</pre>
+          </div>
+
+          <div class="p-3 bg-white rounded-lg border border-slate-200 text-sm text-slate-600 leading-relaxed">
+            <strong class="text-slate-900 font-bold block mb-0.5">배포 없이 실행만 하면 안 되나요?</strong>
+            교사 혼자 쓰는 개인 도구라면 테스트 실행으로 충분하지만, 학생 30명이 각자의 기기(크롬북/스마트폰)에서 웹페이지를 열고 활동 결과를 보내려면 구글의 공개 웹 주소가 필요합니다.<br>
+            따라서 Apps Script 우측 상단 <strong>[배포] ➔ [새 배포] ➔ [유형: 웹 앱]</strong>에서 <strong>'액세스 권한: 모든 사용자(Anyone)'</strong>로 딱 한 번만 배포해 주시면, 발급된 URL을 구글 클래스룸 [과제 ➔ 링크 추가(🔗)]에 붙여넣어 학생들과 바로 공유할 수 있습니다.
+          </div>
+        </div>
+
+      </div>
+    </article>
+
+  </main>
+
+  <!-- ============================================================== -->
+  <!-- 4. FOOTER -->
+  <!-- ============================================================== -->
+  <footer class="mt-16 border-t border-slate-200 bg-white py-6 px-4 text-center text-sm text-slate-500">
+    <div class="max-w-5xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
+      <span>숭문중학교 교내 연수</span>
+      <span>Vibe Coding Pipeline Guide for Teachers</span>
+    </div>
+  </footer>
+
+  <!-- ============================================================== -->
+  <!-- 5. TOAST NOTIFICATION -->
+  <!-- ============================================================== -->
+  <div id="toast" class="toast fixed bottom-6 right-6 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg text-sm font-bold flex items-center gap-2 z-50 pointer-events-none opacity-0 border border-slate-700">
+    <i class="fa-solid fa-check text-slate-300"></i>
+    <span id="toastMsg">클립보드에 복사되었습니다.</span>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- 6. SCRIPT LOGIC -->
+  <!-- ============================================================== -->
+  <script>
+    function toggleStep(stepId) {
+      const content = document.getElementById('content-' + stepId);
+      const icon = document.getElementById('icon-' + stepId);
+      if (!content) return;
+
+      const isOpen = content.classList.contains('open');
+      if (isOpen) {
+        content.classList.remove('open');
+        if (icon) icon.className = 'fa-solid fa-chevron-down text-slate-500 text-sm transition-transform';
+      } else {
+        content.classList.add('open');
+        if (icon) icon.className = 'fa-solid fa-chevron-up text-slate-500 text-sm transition-transform';
+      }
+    }
+
+    function toggleAllSteps(shouldOpen) {
+      for (let i = 1; i <= 6; i++) {
+        const content = document.getElementById('content-step-' + i);
+        const icon = document.getElementById('icon-step-' + i);
+        if (content) {
+          if (shouldOpen) {
+            content.classList.add('open');
+            if (icon) icon.className = 'fa-solid fa-chevron-up text-slate-500 text-sm transition-transform';
+          } else {
+            content.classList.remove('open');
+            if (icon) icon.className = 'fa-solid fa-chevron-down text-slate-500 text-sm transition-transform';
+          }
+        }
+      }
+    }
+
+    function openAndScrollTo(stepId) {
+      const content = document.getElementById('content-' + stepId);
+      const icon = document.getElementById('icon-' + stepId);
+      if (content) {
+        content.classList.add('open');
+        if (icon) icon.className = 'fa-solid fa-chevron-up text-slate-500 text-sm transition-transform';
+      }
+      const target = document.getElementById(stepId);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    function switchOcrTab(tabIndex) {
+      for (let i = 1; i <= 3; i++) {
+        const content = document.getElementById('ocrContent-' + i);
+        const btn = document.getElementById('ocrTabBtn-' + i);
+        if (content) content.classList.remove('active');
+        if (btn) {
+          btn.classList.remove('bg-slate-800', 'text-white', 'font-bold');
+          btn.classList.add('text-slate-600', 'hover:text-slate-900', 'hover:bg-slate-200', 'font-semibold');
+        }
+      }
+
+      const activeContent = document.getElementById('ocrContent-' + tabIndex);
+      const activeBtn = document.getElementById('ocrTabBtn-' + tabIndex);
+      if (activeContent) activeContent.classList.add('active');
+      if (activeBtn) {
+        activeBtn.classList.remove('text-slate-600', 'hover:text-slate-900', 'hover:bg-slate-200', 'font-semibold');
+        activeBtn.classList.add('bg-slate-800', 'text-white', 'font-bold');
+      }
+    }
+
+    function updateAllPrompts() {
+      const unit = document.getElementById('unitInput').value.trim() || '단원 및 주제를 입력해 주세요';
+      const goal = document.getElementById('goalType').value;
+      const count = document.getElementById('ideaCount').value;
+      const time = document.getElementById('activityTime').value;
+      const theme = document.getElementById('themeStyle').value;
+
+      let ideaText = `추출된 [${unit}] 교재 내용을 바탕으로 ${time} 활동할 수 있는 교육용 웹앱 아이디어를 제안해 줘.
+- 단원 목표 성격: [${goal}]
+- 추천 아이디어 개수: ${count}
+각 아이디어마다 (1) 학생이 직접 조작하거나 선택할 핵심 요소(슬라이더, 선택지, 버튼 등), (2) 화면에 즉각 나타나는 반응과 피드백, (3) 이를 통해 자연스럽게 체득하게 되는 교과 개념 및 배움을 구체적인 화면 구성안과 함께 제시해 줘.`;
+      document.getElementById('ideaPromptBox').innerText = ideaText;
+
+      const codingText = `선택한 [${unit}] 아이디어를 바탕으로 학생용 인터랙티브 웹앱을 만들어 줘.
+1. 기술 구현 스펙:
+   - 외부 별도 설치 없이 브라우저에서 바로 열리는 단일 HTML 파일 (Tailwind CSS CDN + Vanilla JS)로 작성해 줘.
+   - PC/크롬북(가로 모드)과 태블릿/스마트폰(세로 모드) 환경에 맞춰 자동 적응하는 반응형 레이아웃을 적용해 줘.
+   - 중간 생략(주석 처리) 없이 즉시 실행 가능한 완전한 단일 파일 코드로 출력해 줘.
+
+2. 화면 구성 및 인터랙션:
+   - 선택한 활동 성격에 가장 직관적인 UI(조작부와 반응 영역)를 구성해 줘. (시각적 변화나 그래프가 필요한 경우 Canvas 활용)
+   - 학생이 버튼, 슬라이더, 선택지를 조작하면 지연 없이 즉각 화면과 수치가 부드럽게 반응해야 해.
+
+3. 디자인 스타일 가이드:
+   - 비주얼 테마: ${theme}
+   - 피드백 색상: 정답·성공·유리는 [에메랄드 그린], 오답·경고·손실은 [소프트 레드/앰버] 적용
+
+4. [UX 다이어트 & 교육자료 원칙]:
+   - 이 웹앱은 학교 수업을 위한 교육자료야. 화면 속 안내문이나 피드백 문구에 과장된 밈, 허세, 장황한 미사여구는 절대 넣지 말고, 정중하고 명료하며 담백한 표현을 사용해 줘.
+   - 정보는 추출된 데이터의 범위를 넘어서지 않도록 하고, 지나치게 많은 정보를 빼곡히 넣지 말 것. 지정된 시간 범위(${time})에 알맞은 내용 분량으로 구성해 줘.
+   - 불필요한 로그인, 긴 소감문 작성, 장식적인 그래픽 등 군더더기는 덜어내고, 학생이 접속 즉시 핵심 개념을 조작하고 탐구할 수 있도록 화면을 직관적으로 만들어 줘.
+   - 최초 완성 후에도 교사와 대화하며 세부 사용성과 피드백 문구를 점진적으로 다듬을 수 있도록 코드를 깔끔하게 모듈화해 줘.`;
+      document.getElementById('codingPromptBox').innerText = codingText;
+    }
+
+    function copySnippet(btn) {
+      const parentCard = btn.closest('div.space-y-2') || btn.closest('div.space-y-2.5') || btn.closest('div.space-y-1.5') || btn.closest('div.ocr-tab-content') || btn.closest('div.bg-slate-50') || btn.closest('div') || btn.closest('article');
+      const pre = parentCard.querySelector('.prompt-text');
+      if (!pre) return;
+
+      copyRawText(pre.innerText, btn);
+    }
+
+    function copyRawText(text, btnElement) {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-999999px";
+      textArea.style.top = "-999999px";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      try {
+        document.execCommand('copy');
+        showToast('클립보드에 복사되었습니다.');
+        
+        if (btnElement) {
+          const originalText = btnElement.innerHTML;
+          btnElement.innerHTML = '<i class="fa-solid fa-check"></i> 복사 완료';
+          setTimeout(() => {
+            btnElement.innerHTML = originalText;
+          }, 1500);
+        }
+      } catch (err) {
+        showToast('복사에 실패했습니다.');
+      } finally {
+        document.body.removeChild(textArea);
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      updateAllPrompts();
+      toggleStep('step-1');
+    });
+  </script>
+</body>
+</html>

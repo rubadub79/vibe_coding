@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="ko" class="h-full bg-slate-50">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>원클릭 웹앱 프롬프트 작성기</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            sungmoon: {
+              50: '#f0f7ff',
+              100: '#e0effe',
+              500: '#1d4ed8',
+              600: '#1e40af',
+              700: '#1e3a8a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    .preset-btn.active {
+      background-color: #eff6ff;
+      border-color: #3b82f6;
+      color: #1d4ed8;
+      font-weight: 700;
+      box-shadow: 0 1px 3px rgba(59, 130, 246, 0.2);
+    }
+  </style>
+</head>
+<body class="h-full flex flex-col font-sans text-slate-800 antialiased selection:bg-indigo-100 selection:text-indigo-700">
+
+  <!-- Header Section -->
+  <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <div class="flex items-center space-x-3 text-left">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sungmoon-600 to-blue-500 flex items-center justify-center text-white shadow-md">
+          <i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-base sm:text-lg leading-tight tracking-tight text-slate-100 flex items-center gap-2">
+            원클릭 웹앱 프롬프트 작성기
+            <span class="text-[10px] bg-blue-500/30 text-blue-300 border border-blue-400/30 px-2 py-0.5 rounded-full font-normal">Gemini & Canvas 전용</span>
+          </h1>
+          <p class="text-[11px] text-slate-400">중학교 수업 맞춤형 상호작용 웹앱 프롬프트 제작 도구</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-2 sm:space-x-3">
+        <span class="px-3 py-1.5 text-xs font-semibold bg-sungmoon-600/90 text-white rounded-lg flex items-center space-x-1.5 shadow-sm border border-sungmoon-500/30">
+          <i class="fa-solid fa-graduation-cap text-xs"></i>
+          <span class="hidden sm:inline">숭문 Teacher Hub</span> 연수용
+        </span>
+
+        <button id="btn-reset" class="px-3 py-1.5 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg border border-slate-700 transition-all flex items-center space-x-1.5">
+          <i class="fa-solid fa-rotate-left text-xs"></i>
+          <span>초기화</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col space-y-6">
+
+    <!-- Preset Selection Bar -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-bolt text-amber-500"></i>
+          <h2 class="text-xs font-bold text-slate-800">중학교 추천 수업 웹앱 템플릿</h2>
+        </div>
+        <span class="text-[11px] text-slate-400">템플릿 클릭 시 수업 정보 및 웹앱 조건이 자동 입력됩니다.</span>
+      </div>
+      <div class="flex flex-wrap gap-2" id="preset-buttons">
+        <button class="preset-btn active px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-700 hover:bg-blue-50 hover:text-blue-700 text-xs font-medium transition-all" data-preset="quiz_game">
+          🎯 [국어/어휘] 초성·어휘 골든벨 퀴즈 앱
+        </button>
+        <button class="preset-btn px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-700 hover:bg-blue-50 hover:text-blue-700 text-xs font-medium transition-all" data-preset="science_sim">
+          🧪 [과학/실험] 달의 위상 변화 시뮬레이터
+        </button>
+        <button class="preset-btn px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-700 hover:bg-blue-50 hover:text-blue-700 text-xs font-medium transition-all" data-preset="math_game">
+          🔢 [수학/게임] 정수와 유리수 연산 게임
+        </button>
+        <button class="preset-btn px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-700 hover:bg-blue-50 hover:text-blue-700 text-xs font-medium transition-all" data-preset="english_card">
+          🗂️ [영어/표현] 상황별 회화 플래시카드
+        </button>
+        <button class="preset-btn px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-700 hover:bg-blue-50 hover:text-blue-700 text-xs font-medium transition-all" data-preset="history_timeline">
+          📜 [사회/역사] 역사 사건 순서 맞추기 타임라인
+        </button>
+        <button class="preset-btn px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-700 hover:bg-blue-50 hover:text-blue-700 text-xs font-medium transition-all" data-preset="ethics_debate">
+          ⚖️ [도덕/진로] 가치관 선택 및 토론 가상 투표기
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Grid: Input & Output -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+      <!-- Left Input Panel (5 Cols) -->
+      <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+        
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div class="flex items-center space-x-2">
+            <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs">
+              <i class="fa-solid fa-sliders"></i>
+            </div>
+            <h3 class="font-bold text-sm text-slate-900">수업 및 웹앱 조건 설정</h3>
+          </div>
+          <span class="text-[11px] text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded font-medium">실시간 반영 중</span>
+        </div>
+
+        <div class="space-y-3 text-xs">
+          <!-- Target School Grade -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-medium text-slate-700 mb-1">대상 학교급</label>
+              <select id="input-school" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50 font-semibold text-slate-800" disabled>
+                <option value="중학교" selected>중학교</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-medium text-slate-700 mb-1">대상 학년</label>
+              <select id="input-grade" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                <option value="1학년">중학교 1학년</option>
+                <option value="2학년" selected>중학교 2학년</option>
+                <option value="3학년">중학교 3학년</option>
+                <option value="전 학년">중학교 전 학년</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Subject & Topic -->
+          <div>
+            <label class="block font-medium text-slate-700 mb-1">교과 / 과목명</label>
+            <input type="text" id="input-subject" value="국어" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="예: 국어, 과학, 수학, 영어, 역사 등">
+          </div>
+
+          <div>
+            <label class="block font-medium text-slate-700 mb-1">단원명 및 핵심 수업 주제</label>
+            <input type="text" id="input-topic" value="어휘의 체계와 올바른 어휘 사용 (어휘 초성 골든벨)" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="수업에서 다룰 단원과 주제를 입력하세요">
+          </div>
+
+          <!-- Teaching Model & Time -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-medium text-slate-700 mb-1">교수·학습 모델</label>
+              <select id="input-model" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                <option value="게임 기반 학습 (GBL)" selected>게임 기반 학습 (GBL)</option>
+                <option value="탐구 학습 모델">탐구 학습 모델</option>
+                <option value="문제 해결 학습 (PBL)">문제 해결 학습 (PBL)</option>
+                <option value="개념 형성 학습 모델">개념 형성 학습 모델</option>
+                <option value="협동 학습 및 모둠 활동">협동 학습 및 모둠 활동</option>
+                <option value="직접 교수 및 형성평가">직접 교수 및 형성평가</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-medium text-slate-700 mb-1">수업 차시</label>
+              <select id="input-time" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                <option value="1차시 (45분)" selected>1차시 (45분)</option>
+                <option value="2차시 블록타임 (90분)">2차시 블록타임 (90분)</option>
+                <option value="프로젝트 수업 중 1차시">프로젝트 수업 중 1차시</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-medium text-slate-700 mb-1">웹앱 활용 단계 및 시간</label>
+            <input type="text" id="input-activity-time" value="수업 중 전개/정리 단계 (약 15분~20분)" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="예: 수업 도입 10분, 형성평가 15분 등">
+          </div>
+
+          <!-- Achievement Standards -->
+          <div>
+            <label class="block font-medium text-slate-700 mb-1">2022 개정 교육과정 성취기준 / 학습 목표</label>
+            <textarea id="input-standards" rows="2" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none" placeholder="관련 성취기준이나 핵심 개념을 입력하세요">[9국04-02] 어휘의 체계와 양상을 이해하고 국어생활에 활용한다. (고유어, 한자어, 외래어 구별)</textarea>
+          </div>
+
+          <!-- Web App Type & Core Features -->
+          <div class="pt-3 border-t border-slate-100 space-y-3">
+            <label class="block font-bold text-slate-900">구현할 웹앱 형태 및 필수 기능</label>
+
+            <div>
+              <label class="block text-slate-600 mb-1">웹앱 유형</label>
+              <select id="input-app-type" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none">
+                <option value="인터랙티브 퀴즈 / 골든벨 게임" selected>인터랙티브 퀴즈 / 골든벨 게임</option>
+                <option value="가상 시뮬레이션 / 데이터 조작 도구">가상 시뮬레이션 / 데이터 조작 도구</option>
+                <option value="카드 뒤집기 / 플래시카드 학습기">카드 뒤집기 / 플래시카드 학습기</option>
+                <option value="타임라인 / 순서 배열 활동">타임라인 / 순서 배열 활동</option>
+                <option value="드래그 앤 드롭 분류 / 매칭 게임">드래그 앤 드롭 분류 / 매칭 게임</option>
+                <option value="실시간 모둠 투표 / 신호등 가치관 선택기">실시간 모둠 투표 / 신호등 가치관 선택기</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-slate-600 mb-1">웹앱 세부 기능 요구사항</label>
+              <textarea id="input-app-features" rows="3" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none" placeholder="원하는 인터랙션(점수 계산, 제한시간 타이머, 즉각 피드백, 힌트 보기 등)">- 초성 힌트와 문제 카드가 무작위로 제시됨
+- 학생이 답을 입력하고 확인 버튼을 누르면 정답/오답 즉시 판정
+- 30초 카운트다운 타이머 제공
+- 점수 계산 및 연달아 맞히기(콤보) 피드백 제공
+- 모바일 및 스크린 화면에 깔끔하게 맞춤 디자인</textarea>
+            </div>
+
+            <!-- Gemini Canvas Prompt Optimization Level -->
+            <div>
+              <label class="block text-slate-600 mb-1">Gemini 생성 최적화 옵션</label>
+              <select id="input-prompt-mode" class="w-full p-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-blue-50/50 font-medium text-blue-900">
+                <option value="detailed" selected>Gemini & Canvas 최적화형 (시각 효과 & 즉시 공유 가능)</option>
+                <option value="simple">경량 기본형 (핵심 요구사항 위주)</option>
+                <option value="expert">전문가용 (반응형 UI + Web Audio API 정밀화)</option>
+              </select>
+            </div>
+
+            <!-- Checkboxes -->
+            <div class="pt-1 space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
+              <label class="flex items-center space-x-2 cursor-pointer">
+                <input type="checkbox" id="chk-singlefile" checked class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4">
+                <span class="text-slate-700 text-xs font-semibold">단일 파일 HTML 구조 (Tailwind CDN 사용, 즉시 실행 가능)</span>
+              </label>
+
+              <label class="flex items-center space-x-2 cursor-pointer">
+                <input type="checkbox" id="chk-sound" checked class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4">
+                <span class="text-slate-700 text-xs">Web Audio API 기반 효과음 및 시각 애니메이션 포함</span>
+              </label>
+
+              <label class="flex items-center space-x-2 cursor-pointer">
+                <input type="checkbox" id="chk-teacher-mode" checked class="rounded text-indigo-600 focus:ring-indigo-500 w-4 h-4">
+                <span class="text-slate-700 text-xs">교사용 문제 관리/초기화 + 학생 플레이 모드 구분</span>
+              </label>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Right Output Panel (7 Cols) -->
+      <div class="lg:col-span-7 space-y-4">
+        
+        <!-- Generated Prompt Display Card -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+          
+          <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <div class="flex items-center space-x-2">
+              <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xs">
+                <i class="fa-solid fa-code"></i>
+              </div>
+              <h3 class="font-bold text-sm text-slate-900">생성된 원클릭 웹앱 프롬프트</h3>
+            </div>
+
+            <!-- Copy Action Button -->
+            <button id="btn-copy-prompt" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-semibold text-xs rounded-lg shadow transition-all flex items-center space-x-1.5">
+              <i class="fa-regular fa-copy"></i>
+              <span id="copy-btn-text">프롬프트 복사하기</span>
+            </button>
+          </div>
+
+          <!-- Textarea View -->
+          <div class="relative">
+            <textarea id="prompt-output" readonly rows="18" class="w-full p-4 font-mono text-xs leading-relaxed bg-slate-900 text-indigo-200 rounded-xl border border-slate-800 focus:outline-none select-all resize-y shadow-inner"></textarea>
+            <div class="absolute bottom-3 right-3 text-[10px] text-slate-400 bg-slate-800/80 px-2.5 py-1 rounded-md border border-slate-700 backdrop-blur-sm">
+              글자 수: <span id="prompt-char-count" class="text-indigo-300 font-bold">0</span>자
+            </div>
+          </div>
+
+          <!-- Quick AI Service Launch Buttons -->
+          <div class="pt-2 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <span class="text-xs font-bold text-slate-700 flex items-center">
+              <i class="fa-solid fa-paper-plane mr-1.5 text-indigo-600"></i>
+              복사 후 Gemini 실행하기:
+            </span>
+
+            <div class="flex items-center space-x-2">
+              <a href="https://gemini.google.com" target="_blank" rel="noopener noreferrer" class="flex-1 sm:flex-none px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-lg transition-all border border-blue-500 text-center flex items-center justify-center space-x-1.5 shadow-sm ring-2 ring-blue-300/50">
+                <i class="fa-solid fa-sparkles text-amber-300"></i>
+                <span>Gemini 바로가기 (추천)</span>
+              </a>
+              <a href="https://chatgpt.com" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-lg transition-colors border border-slate-300 text-center flex items-center justify-center space-x-1">
+                <i class="fa-solid fa-robot"></i>
+                <span>ChatGPT</span>
+              </a>
+              <a href="https://claude.ai" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-lg transition-colors border border-slate-300 text-center flex items-center justify-center space-x-1">
+                <i class="fa-solid fa-brain"></i>
+                <span>Claude</span>
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Tip Card -->
+        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-4 text-xs text-indigo-950 space-y-2.5 shadow-sm">
+          <div class="flex items-center justify-between font-bold text-blue-900 border-b border-blue-200/60 pb-2">
+            <div class="flex items-center space-x-2">
+              <i class="fa-solid fa-share-nodes text-blue-600 text-sm"></i>
+              <span>✨ Gemini & Canvas 학급 공유 4단계 가이드</span>
+            </div>
+            <span class="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-full font-semibold">학급 공유 꿀팁</span>
+          </div>
+          <ol class="list-decimal list-inside leading-relaxed text-slate-700 space-y-1.5 pl-1">
+            <li>우측 상단 <b>'프롬프트 복사하기'</b> 버튼을 클릭합니다.</li>
+            <li><b>Gemini(gemini.google.com)</b> 창을 열고 프롬프트를 붙여넣어 실행합니다.</li>
+            <li>생성된 <b>Canvas(캔버스) 창</b>에서 웹앱 동작을 바로 미리보고 테스트합니다.</li>
+            <li>Gemini 우측의 <b>[공유 및 내보내기] → [공유 링크 생성]</b>을 클릭하여 받은 링크를 구글 클래스룸, 카카오톡 등에 전달하면 학생들이 즉시 웹앱을 이용할 수 있습니다!</li>
+          </ol>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+  <script>
+    // Global variable for copy button timer management
+    let copyTimeout = null;
+
+    // Safe DOM helper function to avoid null runtime errors
+    function getVal(id, defaultVal = '') {
+      const el = document.getElementById(id);
+      return el ? el.value : defaultVal;
+    }
+
+    function getChecked(id, defaultVal = false) {
+      const el = document.getElementById(id);
+      return el ? el.checked : defaultVal;
+    }
+
+    // Toast Notification System
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+
+      const toast = document.createElement('div');
+      const bgColor = type === 'error' ? 'bg-red-600' : type === 'success' ? 'bg-emerald-600' : 'bg-slate-900';
+      const iconClass = type === 'error' ? 'fa-circle-exclamation' : type === 'success' ? 'fa-circle-check' : 'fa-circle-info';
+
+      toast.className = `pointer-events-auto px-4 py-3 rounded-xl shadow-xl text-xs font-semibold text-white transition-all duration-300 transform translate-y-3 opacity-0 flex items-center space-x-2.5 ${bgColor}`;
+      toast.innerHTML = `<i class="fa-solid ${iconClass} text-sm"></i> <span>${message}</span>`;
+      
+      container.appendChild(toast);
+
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-3', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-3');
+        setTimeout(() => toast.remove(), 300);
+      }, 2500);
+    }
+
+    // Dynamic Prompt Generator Engine
+    function generatePrompt() {
+      const school = getVal('input-school', '중학교');
+      const grade = getVal('input-grade', '2학년');
+      const subject = getVal('input-subject', '국어').trim();
+      const topic = getVal('input-topic', '수업 주제').trim();
+      const model = getVal('input-model', '게임 기반 학습 (GBL)');
+      const time = getVal('input-time', '1차시 (45분)');
+      const activityTime = getVal('input-activity-time', '수업 중 약 15~20분').trim();
+      const standards = getVal('input-standards', '').trim();
+      const appType = getVal('input-app-type', '인터랙티브 퀴즈');
+      const appFeatures = getVal('input-app-features', '').trim();
+      const promptMode = getVal('input-prompt-mode', 'detailed');
+
+      const isSingleFile = getChecked('chk-singlefile', true);
+      const isSound = getChecked('chk-sound', true);
+      const isTeacherMode = getChecked('chk-teacher-mode', true);
+
+      let prompt = `당신은 대한민국 중학교 교육과정과 최신 웹 프론트엔드 기술(HTML5, Vanilla JavaScript, Tailwind CSS)에 정통한 에듀테크 상호작용 웹앱 개발 전문가입니다.
+Gemini Canvas(캔버스) 및 웹 브라우저에서 외부 서버 없이 즉시 완벽하게 실행될 수 있도록 아래 [중학교 수업 맥락]과 [웹앱 요구사항]을 반영한 [단일 HTML 코드]를 작성해 주세요.
+
+---
+
+### 1. 중학교 수업 맥락 및 대상 정보
+- **학교급 및 학년**: ${school} ${grade}
+- **교과 및 과목**: ${subject}
+- **단원명 및 핵심 수업 주제**: ${topic}
+- **교수·학습 모델**: ${model}
+- **수업 차시 및 시간**: ${time}
+- **수업 중 웹앱 활용 단계**: ${activityTime || '수업 전개/정리 단계 (약 15~20분)'}
+- **2022 개정 교육과정 성취기준 / 핵심 개념**:
+  ${standards || '해당 중학교 단원 주제 및 기본 성취기준에 부합하도록 구성'}
+
+---
+
+### 2. 구현할 웹앱 유형 및 핵심 기능 사양
+- **웹앱 유형**: ${appType}
+- **주요 인터랙션 및 필수 기능 요구사항**:
+${appFeatures || '- 학생이 직관적으로 조작할 수 있는 세련된 UI/UX\n- 즉각적인 정답/결과 피드백 및 시각 효과'}
+
+---
+
+### 3. 개발 기술 스펙 및 필수 준수 규칙 (Gemini Canvas 전용)
+
+1. **단일 HTML 파일 완결성 (Single File Architecture)**:
+   - 모든 HTML, CSS, JavaScript 코드는 단 하나의 \`<!DOCTYPE html>\` 파일 안에 통합되어야 합니다.
+   - 외부 .css 또는 .js 파일 경로를 참조하지 마시고, Tailwind CSS CDN(\`<script src="https://cdn.tailwindcss.com"><\/script>\`) 및 FontAwesome 아이콘 CDN을 포함하세요.
+
+2. **중학생 맞춤 UI/UX 및 반응형 디자인**:
+   - 중학생의 흥미와 학습 집중도를 유발하는 시각적 카운트다운, 카운터, 카드형 디자인.
+   - 모바일 스마트폰, 태블릿, 학급 TV/전자칠판에 즉시 맞춰지는 반응형 레이아웃 적용.
+   - alert()나 confirm() 창 대신 세련된 피드백 모달 및 Toast 안내 메시지 사용.`;
+
+      if (isSound) {
+        prompt += `
+
+3. **Web Audio API 기반 사운드 연출**:
+   - 외부 audio MP3 URL의 링크가 끊기는 것을 방지하기 위해, 브라우저 내장 **Web Audio API (AudioContext)**로 정답/오답/버튼 클릭 효과음을 자동 합성해 포함해 주세요.`;
+      }
+
+      if (isTeacherMode) {
+        prompt += `
+
+4. **교사 관리 기능 및 학생 플레이 모드 구분**:
+   - 교사가 직접 문제를 수정/추가하거나 기본 세트로 초기화할 수 있는 '교사 설정 모드'와 학생 활동용 '플레이 모드'를 제공해 주세요.`;
+      }
+
+      if (promptMode === 'expert') {
+        prompt += `
+
+5. **전문가 모드 추가 사양**:
+   - 로컬 저장소(localStorage)를 활용해 새로고침 시에도 교사 문제 데이터 및 플레이 상태가 보존되도록 구현하세요.
+   - 키보드 단축키(Enter, Space) 지원으로 조작 편의성을 제공하세요.`;
+      }
+
+      prompt += `\n\n---
+[최종 출력 지침]
+선생님이 복사하여 Gemini Canvas에 입력하면 바로 작동할 수 있도록, 다른 설명이나 생략(...) 없이 **<!DOCTYPE html>부터 시작하여 </html>로 끝나는 완전하고 완성된 단일 HTML 코드만** 출력해 주세요.`;
+
+      const outputEl = document.getElementById('prompt-output');
+      const countEl = document.getElementById('prompt-char-count');
+
+      if (outputEl) {
+        outputEl.value = prompt;
+      }
+      if (countEl) {
+        countEl.textContent = prompt.length.toLocaleString();
+      }
+    }
+
+    // Clipboard Copy Handler with Safety & Timer Reset
+    async function copyPromptToClipboard() {
+      const outputEl = document.getElementById('prompt-output');
+      const btnCopy = document.getElementById('btn-copy-prompt');
+      const btnText = document.getElementById('copy-btn-text');
+      
+      if (!outputEl || !outputEl.value) {
+        showToast('복사할 프롬프트가 없습니다.', 'error');
+        return;
+      }
+
+      const textToCopy = outputEl.value;
+
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(textToCopy);
+        } else {
+          outputEl.select();
+          document.execCommand('copy');
+        }
+        
+        if (btnCopy && btnText) {
+          btnCopy.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+          btnCopy.classList.add('bg-emerald-600', 'hover:bg-emerald-700');
+          btnText.textContent = '복사 완료!';
+
+          if (copyTimeout) clearTimeout(copyTimeout);
+
+          copyTimeout = setTimeout(() => {
+            btnCopy.classList.remove('bg-emerald-600', 'hover:bg-emerald-700');
+            btnCopy.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+            btnText.textContent = '프롬프트 복사하기';
+          }, 2000);
+        }
+
+        showToast('프롬프트가 복사되었습니다! Gemini에 붙여넣으세요.', 'success');
+
+      } catch (err) {
+        outputEl.select();
+        document.execCommand('copy');
+        showToast('프롬프트가 클립보드에 복사되었습니다.', 'success');
+      }
+    }
+
+    // Preset Configurations
+    const presets = {
+      quiz_game: {
+        grade: '1학년',
+        subject: '국어',
+        topic: '어휘의 체계와 올바른 어휘 사용 (어휘 초성 골든벨)',
+        model: '게임 기반 학습 (GBL)',
+        time: '1차시 (45분)',
+        activityTime: '수업 전개/정리 단계 (약 15분~20분)',
+        standards: '[9국04-02] 어휘의 체계와 양상을 이해하고 국어생활에 활용한다. (고유어, 한자어, 외래어 구별)',
+        appType: '인터랙티브 퀴즈 / 골든벨 게임',
+        appFeatures: `- 초성 힌트와 어휘 문제 카드가 무작위로 제시됨\n- 고유어, 한자어, 외래어 분류 퀴즈 지원\n- 30초 카운트다운 타이머 및 콤보 점수 시스템\n- 정답 입력 시 즉각적인 해설 모달 및 점수 획득 시각 효과`,
+        singlefile: true,
+        sound: true,
+        teacherMode: true
+      },
+      science_sim: {
+        grade: '2학년',
+        subject: '과학',
+        topic: '태양계 - 달의 크기와 모양 변화(위상) 관찰 시뮬레이터',
+        model: '탐구 학습 모델',
+        time: '1차시 (45분)',
+        activityTime: '탐구 및 실험 활동 (약 20분)',
+        standards: '[9과11-02] 달의 위상 변화와 개식 현상을 달의 공전으로 설명할 수 있다.',
+        appType: '가상 시뮬레이션 / 데이터 조작 도구',
+        appFeatures: `- 슬라이더를 조작하여 달의 공전 위치(1일~30일)를 변경 가능\n- 지구에서 보이는 달의 모양(초승달, 상현달, 보름달, 하현달, 그믐달) 실시간 음영 시각화\n- 햇빛의 방향과 음영 위치 조작 슬라이더\n- 각 위상별 명칭 퀴즈 및 확인 기능`,
+        singlefile: true,
+        sound: true,
+        teacherMode: true
+      },
+      math_game: {
+        grade: '1학년',
+        subject: '수학',
+        topic: '정수와 유리수의 사칙연산 부호 맞추기 게임',
+        model: '게임 기반 학습 (GBL)',
+        time: '1차시 (45분)',
+        activityTime: '형성평가 및 정착 단계 (15분)',
+        standards: '[9수01-03] 정수와 유리수의 사칙연산의 원리를 이해하고 그 계산을 할 수 있다.',
+        appType: '드래그 앤 드롭 분류 / 매칭 게임',
+        appFeatures: `- 음수와 양수의 곱셈, 나눗셈 식 카드가 무작위 생성됨\n- 결과를 올바른 부호(양수/음수/0) 상자에 드래그하거나 클릭하여 배치\n- 연속 정답 시 콤보 점수 및 애니메이션 효과\n- 난이도(쉬움/보통/어려움) 선택 기능`,
+        singlefile: true,
+        sound: true,
+        teacherMode: true
+      },
+      english_card: {
+        grade: '2학년',
+        subject: '영어',
+        topic: '상황별 길 묻기와 안내하기 필수 표현 플래시카드',
+        model: '개념 형성 학습 모델',
+        time: '1차시 (45분)',
+        activityTime: '도입 및 표현 익히기 (15분)',
+        standards: '[9영02-01] 일상생활에 관한 주제에 대해 간단한 질문을 하거나 답할 수 있다.',
+        appType: '카드 뒤집기 / 플래시카드 학습기',
+        appFeatures: `- 앞면: 상황별 영어 주요 표현 (예: How can I get to the station?)\n- 뒷면: 한국어 뜻 및 관련 어휘 힌트\n- 카드 Flip 애니메이션 효과 및 음성 합성(Web Speech TTS API) 발음 듣기\n- 학생 자가 체크 (알아 / 몰라) 모아보기 기능`,
+        singlefile: true,
+        sound: true,
+        teacherMode: true
+      },
+      history_timeline: {
+        grade: '3학년',
+        subject: '역사 / 사회',
+        topic: '조선 전기 주요 사건 순서 맞추기 타임라인',
+        model: '문제 해결 학습 (PBL)',
+        time: '1차시 (45분)',
+        activityTime: '정리 및 핵심 개념 확인 (15분)',
+        standards: '[9역03-01] 조선의 건국과 통치 체제 정비 과정을 역사의 흐름 속에서 이해한다.',
+        appType: '타임라인 / 순서 배열 활동',
+        appFeatures: `- 조선 건국, 훈민정음 창제, 6조 직계제, 임진왜란 등 사건 카드 무작위 섞기\n- 카드를 순서대로 드래그 또는 버튼으로 배치하기\n- 정답 확인 버튼 클릭 시 올바른 순서 및 연도 피드백 제공\n- 힌트 보기 및 사건 상세설명 팝업`,
+        singlefile: true,
+        sound: true,
+        teacherMode: true
+      },
+      ethics_debate: {
+        grade: '2학년',
+        subject: '도덕 / 진로',
+        topic: '인공지능 윤리적 딜레마 상황과 가치관 판단 토론',
+        model: '협동 학습 및 모둠 활동',
+        time: '1차시 (45분)',
+        activityTime: '모둠 토론 및 의견 공유 단계 (20분)',
+        standards: '[9도03-02] 정보 사회와 과학 기술 발전에 따른 윤리적 문제의 해결 방안을 탐구한다.',
+        appType: '실시간 모둠 투표 / 신호등 가치관 선택기',
+        appFeatures: `- 자율주행차 딜레마 등 딜레마 제시 카드\n- 찬성/반대/중립 신호등 투표 및 이유 작성 폼\n- 선택 결과 그래프 시각화\n- 모둠별 대표 의견 발표용 모달 디스플레이`,
+        singlefile: true,
+        sound: true,
+        teacherMode: true
+      }
+    };
+
+    // Initialize Event Listeners safely
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      // Preset Buttons Click Event
+      const presetBtns = document.querySelectorAll('.preset-btn');
+      presetBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const pKey = btn.dataset.preset;
+          const data = presets[pKey];
+
+          if (data) {
+            document.getElementById('input-grade').value = data.grade;
+            document.getElementById('input-subject').value = data.subject;
+            document.getElementById('input-topic').value = data.topic;
+            document.getElementById('input-model').value = data.model;
+            document.getElementById('input-time').value = data.time;
+            document.getElementById('input-activity-time').value = data.activityTime;
+            document.getElementById('input-standards').value = data.standards;
+            document.getElementById('input-app-type').value = data.appType;
+            document.getElementById('input-app-features').value = data.appFeatures;
+
+            document.getElementById('chk-singlefile').checked = data.singlefile;
+            document.getElementById('chk-sound').checked = data.sound;
+            document.getElementById('chk-teacher-mode').checked = data.teacherMode;
+
+            presetBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            generatePrompt();
+            showToast(`'${data.topic.split('(')[0].trim()}' 템플릿이 적용되었습니다.`, 'success');
+          }
+        });
+      });
+
+      // Inputs Change & Input Listener
+      const inputIds = [
+        'input-school', 'input-grade', 'input-subject', 'input-topic', 
+        'input-model', 'input-time', 'input-activity-time', 'input-standards', 
+        'input-app-type', 'input-app-features', 'input-prompt-mode',
+        'chk-singlefile', 'chk-sound', 'chk-teacher-mode'
+      ];
+
+      inputIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('input', generatePrompt);
+          el.addEventListener('change', generatePrompt);
+        }
+      });
+
+      // Copy Button Listener
+      const btnCopy = document.getElementById('btn-copy-prompt');
+      if (btnCopy) {
+        btnCopy.addEventListener('click', copyPromptToClipboard);
+      }
+
+      // Reset Button Listener
+      const btnReset = document.getElementById('btn-reset');
+      if (btnReset) {
+        btnReset.addEventListener('click', () => {
+          document.getElementById('input-grade').value = '2학년';
+          document.getElementById('input-subject').value = '국어';
+          document.getElementById('input-topic').value = '어휘의 체계와 올바른 어휘 사용 (어휘 초성 골든벨)';
+          document.getElementById('input-model').value = '게임 기반 학습 (GBL)';
+          document.getElementById('input-time').value = '1차시 (45분)';
+          document.getElementById('input-activity-time').value = '수업 중 전개/정리 단계 (약 15분~20분)';
+          document.getElementById('input-standards').value = '[9국04-02] 어휘의 체계와 양상을 이해하고 국어생활에 활용한다. (고유어, 한자어, 외래어 구별)';
+          document.getElementById('input-app-type').value = '인터랙티브 퀴즈 / 골든벨 게임';
+          document.getElementById('input-app-features').value = '- 초성 힌트와 문제 카드가 무작위로 제시됨\n- 학생이 답을 입력하고 확인 버튼을 누르면 정답/오답 즉시 판정\n- 30초 카운트다운 타이머 제공\n- 점수 계산 및 연달아 맞히기(콤보) 피드백 제공\n- 모바일 및 스크린 화면에 깔끔하게 맞춤 디자인';
+          document.getElementById('input-prompt-mode').value = 'detailed';
+          document.getElementById('chk-singlefile').checked = true;
+          document.getElementById('chk-sound').checked = true;
+          document.getElementById('chk-teacher-mode').checked = true;
+
+          presetBtns.forEach(b => b.classList.remove('active'));
+          if (presetBtns[0]) presetBtns[0].classList.add('active');
+
+          generatePrompt();
+          showToast('모든 입력 설정이 초기화되었습니다.');
+        });
+      }
+
+      // First Trigger on Load
+      generatePrompt();
+    });
+  </script>
+</body>
+</html>
